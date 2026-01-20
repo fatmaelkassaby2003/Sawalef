@@ -15,7 +15,13 @@ class HobbyController extends Controller
      */
     public function index(): JsonResponse
     {
-        $hobbies = Hobby::all(['id', 'name']);
+        $hobbies = Hobby::all(['id', 'name', 'icon'])->map(function($hobby) {
+            return [
+                'id' => $hobby->id,
+                'name' => $hobby->name,
+                'icon' => $hobby->icon ? asset($hobby->icon) : null,
+            ];
+        });
 
         return response()->json([
             'success' => true,
@@ -29,7 +35,13 @@ class HobbyController extends Controller
     public function myHobbies(Request $request): JsonResponse
     {
         $user = $request->user();
-        $hobbies = $user->hobbies()->get(['hobbies.id', 'hobbies.name']);
+        $hobbies = $user->hobbies()->get(['hobbies.id', 'hobbies.name', 'hobbies.icon'])->map(function($hobby) {
+            return [
+                'id' => $hobby->id,
+                'name' => $hobby->name,
+                'icon' => $hobby->icon ? asset($hobby->icon) : null,
+            ];
+        });
 
         return response()->json([
             'success' => true,
@@ -61,7 +73,13 @@ class HobbyController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Hobbies updated successfully',
-            'hobbies' => $user->hobbies()->get(['hobbies.id', 'hobbies.name']),
+            'hobbies' => $user->hobbies()->get(['hobbies.id', 'hobbies.name', 'hobbies.icon'])->map(function($hobby) {
+                return [
+                    'id' => $hobby->id,
+                    'name' => $hobby->name,
+                    'icon' => $hobby->icon ? asset($hobby->icon) : null,
+                ];
+            }),
         ]);
     }
 
