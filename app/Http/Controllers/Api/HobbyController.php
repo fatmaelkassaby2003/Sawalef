@@ -88,7 +88,7 @@ class HobbyController extends Controller
             ], 422);
         }
 
-        // Single hobby creation
+    // Single hobby creation
         if ($request->has('name')) {
             $iconPath = null;
             if ($request->hasFile('icon')) {
@@ -107,6 +107,7 @@ class HobbyController extends Controller
             $hobbyData = [
                 'id' => $hobby->id,
                 'name' => $hobby->name,
+                'icon' => $hobby->icon ? asset($hobby->icon) : null,
             ];
 
             return response()->json([
@@ -137,6 +138,7 @@ class HobbyController extends Controller
             $createdHobbies[] = [
                 'id' => $hobby->id,
                 'name' => $hobby->name,
+                'icon' => $hobby->icon ? asset($hobby->icon) : null,
             ];
         }
 
@@ -145,6 +147,63 @@ class HobbyController extends Controller
             'message' => count($createdHobbies) . ' hobbies created successfully',
             'hobbies' => $createdHobbies,
         ], 201);
+    }
+
+    /**
+     * Update specific hobby (Admin only)
+     * POST method to handle file uploads
+     */
+    public function update(Request $request, int $id): JsonResponse
+    {
+        $hobby = Hobby::find($id);
+
+        if (!$hobby) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Hobby not found',
+            ], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'nullable|string|max:255|unique:hobbies,name,' . $id,
+            'icon' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        if ($request->has('name')) {
+            $hobby->name = $request->name;
+        }
+
+        if ($request->hasFile('icon')) {
+            // Delete old icon if exists
+            if ($hobby->icon && file_exists(public_path($hobby->icon))) {
+                unlink(public_path($hobby->icon));
+            }
+
+            $file = $request->file('icon');
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('hobby_icons'), $filename);
+            $hobby->icon = 'hobby_icons/' . $filename;
+        }
+
+        $hobby->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Hobby updated successfully',
+            'hobby' => [
+                'id' => $hobby->id,
+                'name' => $hobby->name,
+                'icon' => $hobby->icon ? asset($hobby->icon) : null,
+            ],
+        ]);
     }
 
     /**

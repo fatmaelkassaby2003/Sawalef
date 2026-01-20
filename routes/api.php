@@ -43,5 +43,6 @@ Route::middleware('auth:sanctum')->group(function () {
 // Admin routes (require authentication)
 Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
     Route::post('/hobbies', [HobbyController::class, 'store']); // Create hobby
+    Route::post('/hobbies/{id}', [HobbyController::class, 'update']); // Update hobby (POST for file upload)
     Route::delete('/hobbies/{id}', [HobbyController::class, 'destroy']); // Delete hobby
 });

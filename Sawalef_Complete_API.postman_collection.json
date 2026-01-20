@@ -442,6 +442,46 @@
                     "response": []
                 },
                 {
+                    "name": "Update Hobby (POST)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "name",
+                                    "value": "التسلق (معدل)",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "icon",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/admin/hobbies/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "hobbies",
+                                "1"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
                     "name": "Delete Hobby",
                     "request": {
                         "method": "DELETE",
