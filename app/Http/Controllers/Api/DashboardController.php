@@ -109,6 +109,17 @@ class DashboardController extends Controller
             'success' => true,
             'data' => [
                 'users' => $users->map(function($user) {
+                    $profileImage = null;
+                    if ($user->profile_image) {
+                        if (str_starts_with($user->profile_image, 'http')) {
+                            $profileImage = $user->profile_image;
+                        } elseif (file_exists(public_path('uploads/' . $user->profile_image))) {
+                            $profileImage = url('uploads/' . $user->profile_image);
+                        } else {
+                            $profileImage = url('storage/' . $user->profile_image);
+                        }
+                    }
+
                     return [
                         'id' => $user->id,
                         'name' => $user->name,
@@ -117,13 +128,13 @@ class DashboardController extends Controller
                         'age' => $user->age,
                         'country' => $user->country_name ?? $user->country,
                         'gender' => $user->gender,
-                        'profile_image' => $user->profile_image ? url('storage/' . $user->profile_image) : null,
+                        'profile_image' => $profileImage,
                         'posts_count' => $user->posts_count,
                         'hobbies_count' => $user->hobbies_count,
                         'hobbies' => $user->hobbies->map(fn($h) => [
                             'id' => $h->id,
                             'name' => $h->name,
-                            'icon' => $h->icon ? url($h->icon) : null,
+                            'icon' => $h->icon ? (str_starts_with($h->icon, 'http') ? $h->icon : url($h->icon)) : null,
                         ]),
                         'created_at' => $user->created_at->format('Y-m-d H:i:s'),
                     ];
@@ -232,13 +243,26 @@ class DashboardController extends Controller
             ->orderBy('hobbies_count', 'desc')
             ->limit(10)
             ->get()
+            ->get()
+            ->get()
             ->map(function($user) {
+                $profileImage = null;
+                if ($user->profile_image) {
+                    if (str_starts_with($user->profile_image, 'http')) {
+                        $profileImage = $user->profile_image;
+                    } elseif (file_exists(public_path('uploads/' . $user->profile_image))) {
+                        $profileImage = url('uploads/' . $user->profile_image);
+                    } else {
+                        $profileImage = url('storage/' . $user->profile_image);
+                    }
+                }
+
                 return [
                     'id' => $user->id,
                     'name' => $user->name,
                     'nickname' => $user->nickname,
                     'hobbies_count' => $user->hobbies_count,
-                    'profile_image' => $user->profile_image ? asset('storage/' . $user->profile_image) : null,
+                    'profile_image' => $profileImage,
                 ];
             });
         

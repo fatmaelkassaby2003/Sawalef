@@ -1,17 +1,19 @@
 // API Configuration
-// API Configuration
-// Dynamically determine API base URL based on current path
 const getBaseUrl = () => {
-    const path = window.location.pathname;
-    // If we are in /public/, append /api/admin/dashboard
-    if (path.includes('/public')) {
-        return window.location.origin + '/public/api/admin/dashboard';
+    const hostname = window.location.hostname;
+    
+    // Explicitly check for production domain
+    if (hostname.includes('ahdafweb.com')) {
+        // ALWAYS use this path for production
+        return 'https://sawalef.ahdafweb.com/public/api/admin/dashboard';
     }
-    // Otherwise assume root
-    return window.location.origin + '/api/admin/dashboard';
+
+    // Default to localhost
+    return 'http://127.0.0.1:8000/api/admin/dashboard';
 };
 
 const API_BASE_URL = getBaseUrl();
+console.log('Final API_BASE_URL:', API_BASE_URL); // Debugging
 let authToken = localStorage.getItem('admin_token') || '';
 
 // API Helper Functions
