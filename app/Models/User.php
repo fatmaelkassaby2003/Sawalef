@@ -26,6 +26,7 @@ class User extends Authenticatable
         'age',
         'country',
         'gender',
+        'country', 
         'profile_image',
         'last_otp',
         'last_otp_expires_at',

@@ -37,6 +37,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Matching
     Route::get('/similar-users', [MatchController::class, 'getSimilarUsers']);
+    Route::post('/search-by-country', [MatchController::class, 'searchByCountry']); // Search random user by country with 80% match
+    Route::post('/advanced-search', [MatchController::class, 'advancedSearch']); // Advanced search with filters
 
     // Posts & Social
     Route::get('/posts', [PostController::class, 'index']); // Feed
