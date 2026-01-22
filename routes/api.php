@@ -3,8 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\HobbyController;
 use App\Http\Controllers\Api\MatchController;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\PostController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,7 +29,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Profile management
     Route::get('/profile', [AuthController::class, 'profile']);
     Route::post('/update-profile', [AuthController::class, 'updateProfile']);
-    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/logout', [AuthController::class, 'logout']); // Logout
 
     // User hobbies
     Route::get('/my-hobbies', [HobbyController::class, 'myHobbies']);
@@ -38,6 +37,18 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Matching
     Route::get('/similar-users', [MatchController::class, 'getSimilarUsers']);
+
+    // Posts & Social
+    Route::get('/posts', [PostController::class, 'index']); // Feed
+    Route::post('/posts', [PostController::class, 'store']); // Create post
+    Route::get('/posts/{id}', [PostController::class, 'show']); // Show post
+    Route::post('/posts/{id}', [PostController::class, 'update']); // Update post (POST for file upload)
+    Route::delete('/posts/{id}', [PostController::class, 'destroy']); // Delete post
+    Route::post('/posts/{id}/like', [PostController::class, 'like']); // Toggle like
+    Route::post('/posts/{id}/comment', [PostController::class, 'comment']); // Add comment
+
+    // User Profile (Public/Protected view)
+    Route::get('/users/{id}/profile', [PostController::class, 'userProfile']); // View user profile with posts
 });
 
 // Admin routes (require authentication)

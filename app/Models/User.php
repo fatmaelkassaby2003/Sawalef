@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -49,10 +51,18 @@ class User extends Authenticatable
     ];
 
     /**
-     * User's hobbies
+     * The hobbies that belong to the user.
      */
-    public function hobbies()
+    public function hobbies(): BelongsToMany
     {
         return $this->belongsToMany(Hobby::class, 'user_hobbies');
+    }
+
+    /**
+     * Get the posts for the user.
+     */
+    public function posts(): HasMany
+    {
+        return $this->hasMany(Post::class);
     }
 }
