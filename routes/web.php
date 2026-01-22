@@ -14,5 +14,11 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    $dashboardPath = public_path('index.html');
+    
+    if (file_exists($dashboardPath)) {
+        return response()->file($dashboardPath);
+    }
+    
+    return response('Dashboard not found', 404);
 });
