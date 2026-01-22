@@ -40,6 +40,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Posts & Social
     Route::get('/posts', [PostController::class, 'index']); // Feed
+    Route::get('/my-posts', [PostController::class, 'myPosts']); // My Posts
     Route::post('/posts', [PostController::class, 'store']); // Create post
     Route::get('/posts/{id}', [PostController::class, 'show']); // Show post
     Route::post('/posts/{id}', [PostController::class, 'update']); // Update post (POST for file upload)

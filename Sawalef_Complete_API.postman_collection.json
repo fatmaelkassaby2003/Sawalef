@@ -367,6 +367,29 @@
                     "response": []
                 },
                 {
+                    "name": "Get My Posts",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{auth_token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/my-posts",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "my-posts"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
                     "name": "Create Post",
                     "request": {
                         "method": "POST",

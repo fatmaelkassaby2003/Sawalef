@@ -18,12 +18,15 @@ class PostController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        // Posts sorted by updated_at (which is touched on like)
-        // or we can sort by latest created_at if updated_at is not preferred for everything
-        // Requirement: "When someone likes it, it becomes the first post" -> So sort by updated_at DESC
-        $posts = Post::with(['user:id,name,nickname,profile_image', 'likes', 'comments.user:id,name,nickname,profile_image'])
+        // Two-tier sorting:
+        // 1. Posts with likes come first
+        // 2. Within each group, sort by most recent activity (like time or creation time)
+        $posts = Post::query()
+            ->selectRaw('posts.*, (SELECT MAX(created_at) FROM likes WHERE likes.post_id = posts.id) as last_liked_at')
+            ->with(['user:id,name,nickname,profile_image', 'likes', 'comments.user:id,name,nickname,profile_image'])
             ->withCount('likes', 'comments')
-            ->orderBy('updated_at', 'desc')
+            ->orderByRaw('CASE WHEN (SELECT MAX(created_at) FROM likes WHERE likes.post_id = posts.id) IS NOT NULL THEN 0 ELSE 1 END')
+            ->orderByRaw('COALESCE(last_liked_at, posts.created_at) DESC')
             ->paginate(10);
 
         return response()->json([
@@ -199,7 +202,6 @@ class PostController extends Controller
             $liked = false;
         } else {
             $likes->attach($user->id);
-            $post->touch(); // Update updated_at timestamp to move post to top
             $message = 'Post liked';
             $liked = true;
         }
@@ -261,12 +263,39 @@ class PostController extends Controller
     }
 
     /**
+     * Get current user's posts
+     */
+    public function myPosts(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        
+        $posts = Post::query()
+            ->where('user_id', $user->id)
+            ->selectRaw('posts.*, (SELECT MAX(created_at) FROM likes WHERE likes.post_id = posts.id) as last_liked_at')
+            ->with(['likes', 'comments.user:id,name,nickname,profile_image'])
+            ->withCount('likes', 'comments')
+            ->orderByRaw('CASE WHEN (SELECT MAX(created_at) FROM likes WHERE likes.post_id = posts.id) IS NOT NULL THEN 0 ELSE 1 END')
+            ->orderByRaw('COALESCE(last_liked_at, posts.created_at) DESC')
+            ->paginate(10);
+
+        return response()->json([
+            'success' => true,
+            'posts' => $this->formatPosts($posts),
+            'pagination' => [
+                'current_page' => $posts->currentPage(),
+                'last_page' => $posts->lastPage(),
+                'total' => $posts->total(),
+            ]
+        ]);
+    }
+
+    /**
      * Get User Profile with Posts and Hobbies
      */
     public function userProfile($userId): JsonResponse
     {
         $user = User::with(['hobbies', 'posts' => function($query) {
-            $query->orderBy('created_at', 'desc');
+            $query->orderBy('updated_at', 'desc');
         }, 'posts.likes', 'posts.comments'])->find($userId);
 
         if (!$user) {
