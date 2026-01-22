@@ -1,5 +1,17 @@
 // API Configuration
-const API_BASE_URL = window.location.origin + '/api/admin/dashboard';
+// API Configuration
+// Dynamically determine API base URL based on current path
+const getBaseUrl = () => {
+    const path = window.location.pathname;
+    // If we are in /public/, append /api/admin/dashboard
+    if (path.includes('/public')) {
+        return window.location.origin + '/public/api/admin/dashboard';
+    }
+    // Otherwise assume root
+    return window.location.origin + '/api/admin/dashboard';
+};
+
+const API_BASE_URL = getBaseUrl();
 let authToken = localStorage.getItem('admin_token') || '';
 
 // API Helper Functions
