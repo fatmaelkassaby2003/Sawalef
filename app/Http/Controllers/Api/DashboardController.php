@@ -115,15 +115,15 @@ class DashboardController extends Controller
                         'nickname' => $user->nickname,
                         'phone' => $user->phone,
                         'age' => $user->age,
-                        'country' => $user->country,
+                        'country' => $user->country_name ?? $user->country,
                         'gender' => $user->gender,
-                        'profile_image' => $user->profile_image ? asset('storage/' . $user->profile_image) : null,
+                        'profile_image' => $user->profile_image ? url('storage/' . $user->profile_image) : null,
                         'posts_count' => $user->posts_count,
                         'hobbies_count' => $user->hobbies_count,
                         'hobbies' => $user->hobbies->map(fn($h) => [
                             'id' => $h->id,
                             'name' => $h->name,
-                            'icon' => $h->icon ? asset($h->icon) : null,
+                            'icon' => $h->icon ? url($h->icon) : null,
                         ]),
                         'created_at' => $user->created_at->format('Y-m-d H:i:s'),
                     ];

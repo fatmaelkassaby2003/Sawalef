@@ -147,8 +147,14 @@ class AuthController extends Controller
         );
 
         if ($request->hasFile('profile_image')) {
-            $this->deleteOldProfileImage($user);
-            $updateData['profile_image'] = $request->file('profile_image')->store('profile_images', 'public');
+            // Delete old image if it exists in uploads
+            if ($user->profile_image && file_exists(public_path('uploads/' . $user->profile_image))) {
+                @unlink(public_path('uploads/' . $user->profile_image));
+            }
+            
+            // Store directly in public/uploads/profile_images
+            $path = $request->file('profile_image')->store('profile_images', 'public_uploads');
+            $updateData['profile_image'] = $path;
         }
 
         $user->update($updateData);
@@ -192,7 +198,13 @@ class AuthController extends Controller
             'age'           => $user->age,
             'country'       => $user->country,
             'gender'        => $user->gender,
-            'profile_image' => $user->profile_image ? asset(Storage::url($user->profile_image)) : null,
+            'profile_image' => $user->profile_image 
+                ? (str_starts_with($user->profile_image, 'http') 
+                    ? $user->profile_image 
+                    : (file_exists(public_path('uploads/' . $user->profile_image)) 
+                        ? url('uploads/' . $user->profile_image) 
+                        : url('storage/' . $user->profile_image)))
+                : null,
             'hobbies'       => $user->hobbies()->get(['hobbies.id', 'hobbies.name']),
         ];
     }
