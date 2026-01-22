@@ -33,13 +33,18 @@ class MatchController extends Controller
         $minMatchCount = ceil($userHobbyCount * 0.8); // 80% minimum
 
         // Find users with matching hobbies
-        $similarUsers = User::select('users.*')
-            ->join('user_hobbies', 'users.id', '=', 'user_hobbies.user_id')
-            ->whereIn('user_hobbies.hobby_id', $userHobbyIds)
-            ->where('users.id', '!=', $currentUser->id)
-            ->groupBy('users.id')
-            ->havingRaw('COUNT(DISTINCT user_hobbies.hobby_id) >= ?', [$minMatchCount])
-            ->with('hobbies:id,name')
+        // Find users with matching hobbies
+        $similarUserIds = DB::table('user_hobbies')
+            ->whereIn('hobby_id', $userHobbyIds)
+            ->where('user_id', '!=', $currentUser->id)
+            ->groupBy('user_id')
+            ->havingRaw('COUNT(DISTINCT hobby_id) >= ?', [$minMatchCount])
+            ->pluck('user_id');
+
+        $similarUsers = User::whereIn('id', $similarUserIds)
+            ->with(['hobbies' => function($query) {
+                $query->select('hobbies.id', 'hobbies.name', 'hobbies.icon');
+            }])
             ->get();
 
         // Calculate match percentage for each user
@@ -56,7 +61,11 @@ class MatchController extends Controller
                 'country' => $user->country,
                 'gender' => $user->gender,
                 'profile_image' => $user->profile_image ? asset(Storage::url($user->profile_image)) : null,
-                'hobbies' => $user->hobbies->map(fn($h) => ['id' => $h->id, 'name' => $h->name]),
+                'hobbies' => $user->hobbies->map(fn($h) => [
+                    'id' => $h->id, 
+                    'name' => $h->name,
+                    'icon' => $h->icon ? asset($h->icon) : null
+                ]),
                 'match_percentage' => round($matchPercentage, 2),
                 'common_hobbies_count' => count($commonHobbies),
             ];
