@@ -29,24 +29,60 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->label('الاسم')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('email')
-                    ->label('البريد الإلكتروني')
-                    ->email()
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\DateTimePicker::make('email_verified_at')
-                    ->label('تاريخ تأكيد البريد'),
-                Forms\Components\TextInput::make('password')
-                    ->label('كلمة المرور')
-                    ->password()
-                    ->dehydrateStateUsing(fn ($state) => \Illuminate\Support\Facades\Hash::make($state))
-                    ->dehydrated(fn ($state) => filled($state))
-                    ->required(fn (string $context): bool => $context === 'create')
-                    ->maxLength(255),
+                Forms\Components\Section::make('بيانات الحساب')
+                    ->schema([
+                        Forms\Components\TextInput::make('name')
+                            ->label('الاسم')
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('phone')
+                            ->label('رقم الهاتف')
+                            ->tel()
+                            ->required()
+                            ->unique(ignoreRecord: true)
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('email')
+                            ->label('البريد الإلكتروني')
+                            ->email()
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('password')
+                            ->label('كلمة المرور')
+                            ->password()
+                            ->dehydrateStateUsing(fn ($state) => \Illuminate\Support\Facades\Hash::make($state))
+                            ->dehydrated(fn ($state) => filled($state))
+                            ->required(fn (string $context): bool => $context === 'create')
+                            ->maxLength(255),
+                        Forms\Components\Toggle::make('is_admin')
+                            ->label('صلاحية مسؤول')
+                            ->default(false),
+                    ])->columns(2),
+
+                Forms\Components\Section::make('البيانات الشخصية')
+                    ->schema([
+                        Forms\Components\TextInput::make('nickname')
+                            ->label('اللقب')
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('age')
+                            ->label('العمر')
+                            ->numeric(),
+                        Forms\Components\Select::make('gender')
+                            ->label('النوع')
+                            ->options([
+                                'male' => 'ذكر',
+                                'female' => 'أنثى',
+                            ]),
+                        Forms\Components\TextInput::make('country_ar')
+                            ->label('الدولة (عربي)')
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('country_en')
+                            ->label('الدولة (إنجليزي)')
+                            ->maxLength(255),
+                        Forms\Components\FileUpload::make('profile_image')
+                            ->label('صورة الملف الشخصي')
+                            ->image()
+                            ->directory('profile_images')
+                            ->columnSpanFull(),
+                    ])->columns(2),
             ]);
     }
 
@@ -54,23 +90,44 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\ImageColumn::make('profile_image')
+                    ->label('الصورة')
+                    ->circular()
+                    ->alignCenter()
+                    ->defaultImageUrl(fn ($record) => 'https://ui-avatars.com/api/?name=' . urlencode($record->name) . '&color=FFFFFF&background=3b82f6'),
                 Tables\Columns\TextColumn::make('name')
                     ->label('الاسم')
                     ->searchable(),
+                Tables\Columns\TextColumn::make('phone')
+                    ->label('رقم الهاتف')
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('email')
                     ->label('البريد الإلكتروني')
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->searchable(),
+                Tables\Columns\TextColumn::make('country_ar')
+                    ->label('الدولة'),
+                Tables\Columns\ToggleColumn::make('is_admin')
+                    ->label('مسؤول'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاريخ التسجيل')
                     ->dateTime()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\ViewAction::make()->iconButton()->tooltip('عرض'),
+                Tables\Actions\EditAction::make()->iconButton()->tooltip('تعديل'),
+                Tables\Actions\DeleteAction::make()
+                    ->iconButton()
+                    ->tooltip('حذف')
+                    ->modalHeading('حذف مستخدم')
+                    ->modalDescription('هل أنت متأكد من القيام بهذه العملية؟')
+                    ->modalSubmitActionLabel('تأكيد')
+                    ->modalCancelActionLabel('إلغاء'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -82,7 +139,10 @@ class UserResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ManageUsers::route('/'),
+            'index' => Pages\ListUsers::route('/'),
+            'create' => Pages\CreateUser::route('/create'),
+            'view' => Pages\ViewUser::route('/{record}'),
+            'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
     }
 }
