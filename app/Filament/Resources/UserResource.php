@@ -93,7 +93,7 @@ class UserResource extends Resource
                 Tables\Columns\ImageColumn::make('profile_image')
                     ->label('الصورة')
                     ->circular()
-                    ->alignRight()
+                    ->alignCenter()
                     ->defaultImageUrl(fn ($record) => 'https://ui-avatars.com/api/?name=' . urlencode($record->name) . '&color=FFFFFF&background=3b82f6'),
                 Tables\Columns\TextColumn::make('name')
                     ->label('الاسم')
