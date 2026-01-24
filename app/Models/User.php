@@ -40,6 +40,8 @@ class User extends Authenticatable implements FilamentUser
         'last_otp',
         'last_otp_expires_at',
         'is_admin',
+        'wallet_balance',
+        'gems',
     ];
 
     /**
@@ -62,6 +64,8 @@ class User extends Authenticatable implements FilamentUser
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'is_admin' => 'boolean',
+        'wallet_balance' => 'decimal:2',
+        'gems' => 'integer',
     ];
 
     public function posts()
@@ -72,5 +76,15 @@ class User extends Authenticatable implements FilamentUser
     public function hobbies()
     {
         return $this->belongsToMany(Hobby::class, 'hobby_user', 'user_id', 'hobby_id')->withTimestamps();
+    }
+
+    public function walletTransactions()
+    {
+        return $this->hasMany(WalletTransaction::class);
+    }
+
+    public function packagePurchases()
+    {
+        return $this->hasMany(PackagePurchase::class);
     }
 }

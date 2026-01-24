@@ -57,6 +57,22 @@ class UserResource extends Resource
                             ->default(false),
                     ])->columns(2),
 
+                Forms\Components\Section::make('المحفظة والجواهر 💎')
+                    ->schema([
+                        Forms\Components\TextInput::make('wallet_balance')
+                            ->label('رصيد المحفظة')
+                            ->numeric()
+                            ->default(0)
+                            ->prefix('EGP')
+                            ->suffix('جنيه'),
+                        
+                        Forms\Components\TextInput::make('gems')
+                            ->label('الجواهر')
+                            ->numeric()
+                            ->default(0)
+                            ->suffix('جوهرة'),
+                    ])->columns(2),
+
                 Forms\Components\Section::make('البيانات الشخصية')
                     ->schema([
                         Forms\Components\TextInput::make('nickname')
@@ -109,6 +125,14 @@ class UserResource extends Resource
                     ->label('الدولة'),
                 Tables\Columns\ToggleColumn::make('is_admin')
                     ->label('مسؤول'),
+                Tables\Columns\TextColumn::make('wallet_balance')
+                    ->label('الرصيد')
+                    ->money('EGP')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('gems')
+                    ->label('جواهر 💎')
+                    ->numeric()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاريخ التسجيل')
                     ->dateTime()
