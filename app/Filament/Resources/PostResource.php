@@ -50,12 +50,13 @@ class PostResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\ImageColumn::make('image')
+                    ->label('الصورة')
+                    ->alignCenter(),
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('المستخدم')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\ImageColumn::make('image')
-                    ->label('الصورة'),
                 Tables\Columns\TextColumn::make('content')
                     ->label('المحتوى')
                     ->limit(50)
@@ -75,8 +76,35 @@ class PostResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\ViewAction::make()->iconButton()->tooltip('عرض'),
+                Tables\Actions\EditAction::make()->iconButton()->tooltip('تعديل'),
+                Tables\Actions\Action::make('delete')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->iconButton()
+                    ->tooltip('حذف')
+                    ->extraAttributes([
+                        'onclick' => 'if (!confirm("هل أنت متأكد من حذف هذا المنشور؟")) { event.stopPropagation(); return false; }'
+                    ])
+                    ->action(function ($record) {
+                        try {
+                            $record->delete();
+                            
+                            \Filament\Notifications\Notification::make()
+                                ->title('تم الحذف بنجاح')
+                                ->success()
+                                ->send();
+                                
+                        } catch (\Exception $e) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('فشل الحذف')
+                                ->danger()
+                                ->send();
+                        }
+                    })
+                    ->after(function () {
+                        return redirect()->to(request()->header('Referer'));
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -85,10 +113,23 @@ class PostResource extends Resource
             ]);
     }
 
+    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return true;
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return true;
+    }
+
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ManagePosts::route('/'),
+            'index' => Pages\ListPosts::route('/'),
+            'create' => Pages\CreatePost::route('/create'),
+            'view' => Pages\ViewPost::route('/{record}'),
+            'edit' => Pages\EditPost::route('/{record}/edit'),
         ];
     }
 }

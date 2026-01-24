@@ -93,7 +93,7 @@ class UserResource extends Resource
                 Tables\Columns\ImageColumn::make('profile_image')
                     ->label('الصورة')
                     ->circular()
-                    ->alignCenter()
+                    ->alignRight()
                     ->defaultImageUrl(fn ($record) => 'https://ui-avatars.com/api/?name=' . urlencode($record->name) . '&color=FFFFFF&background=3b82f6'),
                 Tables\Columns\TextColumn::make('name')
                     ->label('الاسم')
@@ -121,19 +121,49 @@ class UserResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make()->iconButton()->tooltip('عرض'),
                 Tables\Actions\EditAction::make()->iconButton()->tooltip('تعديل'),
-                Tables\Actions\DeleteAction::make()
+                Tables\Actions\Action::make('delete')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
                     ->iconButton()
                     ->tooltip('حذف')
-                    ->modalHeading('حذف مستخدم')
-                    ->modalDescription('هل أنت متأكد من القيام بهذه العملية؟')
-                    ->modalSubmitActionLabel('تأكيد')
-                    ->modalCancelActionLabel('إلغاء'),
+                    ->extraAttributes([
+                        'onclick' => 'if (!confirm("هل أنت متأكد من حذف هذا المستخدم؟")) { event.stopPropagation(); return false; }'
+                    ])
+                    ->action(function ($record) {
+                        try {
+                            $record->delete();
+                            
+                            \Filament\Notifications\Notification::make()
+                                ->title('تم الحذف بنجاح')
+                                ->success()
+                                ->send();
+                                
+                        } catch (\Exception $e) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('فشل الحذف')
+                                ->danger()
+                                ->send();
+                        }
+                    })
+                    ->after(function () {
+                        return redirect()->to(request()->header('Referer'));
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return true;
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return true;
     }
 
     public static function getPages(): array

@@ -44,11 +44,15 @@ class HobbyResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\ImageColumn::make('icon')
+                    ->label('الأيقونة')
+                    ->alignCenter()
+                    ->circular()
+                    ->getStateUsing(fn ($record) => (str_contains($record->icon ?? '', '.') || str_contains($record->icon ?? '', '/')) ? $record->icon : null)
+                    ->defaultImageUrl('https://ui-avatars.com/api/?name=%E2%9D%A4&color=FFFFFF&background=ec4899&size=128'),
                 Tables\Columns\TextColumn::make('name')
                     ->label('اسم الهواية')
                     ->searchable(),
-                Tables\Columns\ImageColumn::make('icon')
-                    ->label('الأيقونة'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاريخ الإضافة')
                     ->dateTime()
@@ -64,8 +68,35 @@ class HobbyResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\ViewAction::make()->iconButton()->tooltip('عرض'),
+                Tables\Actions\EditAction::make()->iconButton()->tooltip('تعديل'),
+                Tables\Actions\Action::make('delete')
+                    ->icon('heroicon-o-trash')
+                    ->color('danger')
+                    ->iconButton()
+                    ->tooltip('حذف')
+                    ->extraAttributes([
+                        'onclick' => 'if (!confirm("هل أنت متأكد من حذف هذه الهواية؟")) { event.stopPropagation(); return false; }'
+                    ])
+                    ->action(function ($record) {
+                        try {
+                            $record->delete();
+                            
+                            \Filament\Notifications\Notification::make()
+                                ->title('تم الحذف بنجاح')
+                                ->success()
+                                ->send();
+                                
+                        } catch (\Exception $e) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('فشل الحذف')
+                                ->danger()
+                                ->send();
+                        }
+                    })
+                    ->after(function () {
+                        return redirect()->to(request()->header('Referer'));
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -74,10 +105,23 @@ class HobbyResource extends Resource
             ]);
     }
 
+    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return true;
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return true;
+    }
+
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ManageHobbies::route('/'),
+            'index' => Pages\ListHobbies::route('/'),
+            'create' => Pages\CreateHobby::route('/create'),
+            'view' => Pages\ViewHobby::route('/{record}'),
+            'edit' => Pages\EditHobby::route('/{record}/edit'),
         ];
     }
 }

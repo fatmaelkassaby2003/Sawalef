@@ -4,9 +4,9 @@ namespace App\Filament\Resources\HobbyResource\Pages;
 
 use App\Filament\Resources\HobbyResource;
 use Filament\Actions;
-use Filament\Resources\Pages\ManageRecords;
+use Filament\Resources\Pages\ListRecords;
 
-class ManageHobbies extends ManageRecords
+class ListHobbies extends ListRecords
 {
     protected static string $resource = HobbyResource::class;
 

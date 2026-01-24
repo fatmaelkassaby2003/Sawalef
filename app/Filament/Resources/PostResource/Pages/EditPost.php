@@ -4,16 +4,16 @@ namespace App\Filament\Resources\PostResource\Pages;
 
 use App\Filament\Resources\PostResource;
 use Filament\Actions;
-use Filament\Resources\Pages\ManageRecords;
+use Filament\Resources\Pages\EditRecord;
 
-class ManagePosts extends ManageRecords
+class EditPost extends EditRecord
 {
     protected static string $resource = PostResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\DeleteAction::make(),
         ];
     }
 }
