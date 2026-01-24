@@ -17,11 +17,6 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use App\Filament\Widgets\WelcomeWidget;
-use App\Filament\Widgets\AppInfoWidget;
-use App\Filament\Widgets\MonthlyPostsChart;
-use App\Filament\Widgets\MonthlyUsersChart;
-use App\Filament\Widgets\DashboardStats;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -32,29 +27,28 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
-            ->brandName('Sawalef')
             ->colors([
-                'primary' => Color::Violet,
+                'primary' => Color::Blue,
                 'gray' => Color::Slate,
             ])
             ->font('Cairo')
+            ->brandLogo(fn () => view('filament.brand'))
+            ->brandLogoHeight('3rem')
             ->favicon(asset('favicon.ico'))
+            ->renderHook(
+                 'panels::head.end',
+                 fn (): string => '<link rel="stylesheet" href="' . asset('css/admin_v2.css') . '" />'
+            )
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
                 Pages\Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                WelcomeWidget::class,
-                AppInfoWidget::class,
-                MonthlyPostsChart::class,
-                MonthlyUsersChart::class,
-                DashboardStats::class,
-            ])
-            ->navigationGroups([
-                'المحتوى',
-                'الإعدادات',
+                \App\Filament\Widgets\StatsOverview::class,       // Top Row
+                \App\Filament\Widgets\ProjectInfoWidget::class,   // Right (RTL First)
+                \App\Filament\Widgets\CustomAccountWidget::class, // Left (RTL Second)
+                \App\Filament\Widgets\RecentUsersWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

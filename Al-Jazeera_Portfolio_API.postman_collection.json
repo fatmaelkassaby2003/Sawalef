@@ -1,0 +1,1631 @@
+{
+    "info": {
+        "name": "Al-Jazeera Portfolio API",
+        "description": "API شامل لبورتفوليو الجزيرة والقطاعات - الخدمات والمناهج في جداول منفصلة",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Island API",
+            "item": [
+                {
+                    "name": "Get Island Portfolio",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/island",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "island"
+                            ]
+                        },
+                        "description": "عرض معلومات بورتفوليو الجزيرة"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create or Update Island",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "name",
+                                    "value": "جزيرة الجزيرة",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "description",
+                                    "value": "جزيرة الجزيرة هي واحدة من أجمل الوجهات السياحية في الخليج العربي",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "highlights[0]",
+                                    "value": "شواطئ رملية ذهبية ممتدة على طول الساحل",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "highlights[1]",
+                                    "value": "مياه فيروزية صافية مثالية للسباحة والغطس",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "highlights[2]",
+                                    "value": "منتجعات سياحية فاخرة ذات خدمات عالمية",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "image",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/island",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "island"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Sectors API",
+            "item": [
+                {
+                    "name": "Get All Sectors",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/sectors?limit=",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sectors"
+                            ],
+                            "query": [
+                                {
+                                    "key": "limit",
+                                    "value": "",
+                                    "description": "عدد القطاعات (اختياري)",
+                                    "disabled": true
+                                }
+                            ]
+                        },
+                        "description": "عرض جميع القطاعات\\n\\nالخدمات والمناهج من جداول منفصلة"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Sector by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/sectors/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sectors",
+                                "1"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Sector",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "name",
+                                    "value": "القطاع الصحي",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "description",
+                                    "value": "حلول طبية ذكية ومتكاملة للقطاع الصحي",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "services[0]",
+                                    "value": "السجلات الطبية الإلكترونية",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "services[1]",
+                                    "value": "الحجز الإلكتروني",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "services[2]",
+                                    "value": "التطبيب عن بُعد",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "methodologies[0][title]",
+                                    "value": "الأمان والخصوصية",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "methodologies[0][description]",
+                                    "value": "نضع أمان البيانات الطبية والخصوصية في المقدمة",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "methodologies[1][title]",
+                                    "value": "سهولة الاستخدام",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "methodologies[1][description]",
+                                    "value": "واجهات بديهية وسهلة للمرضى والأطباء",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "image",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/sectors",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sectors"
+                            ]
+                        },
+                        "description": "إضافة قطاع جديد\\n\\nالخدمات: مصفوفة strings\\nالمناهج: مصفوفة objects (title + description)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Sector",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "name",
+                                    "value": "القطاع الحكومي",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "description",
+                                    "value": "نقدم حلول متكاملة للجهات الحكومية تشمل التحول الرقمي",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "services[0]",
+                                    "value": "الاستشارات الإدارية والتخطيط",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "services[1]",
+                                    "value": "التحول الرقمي للجهات الحكومية",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "services[2]",
+                                    "value": "تطوير الأنظمة الإلكترونية",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "methodologies[0][title]",
+                                    "value": "منهجية أجايل",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "methodologies[0][description]",
+                                    "value": "نستخدم أجايل للتطوير التدريجي والتحسين المستمر",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "methodologies[1][title]",
+                                    "value": "الحوكمة والالتزام",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "methodologies[1][description]",
+                                    "value": "نلتزم بأعلى معايير الحوكمة والشفافية",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "image",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/sectors/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sectors",
+                                "1"
+                            ]
+                        },
+                        "description": "⚠️ استخدم POST وليس PUT\\n\\nتحديث قطاع موجود"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Sector",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/sectors/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "sectors",
+                                "1"
+                            ]
+                        },
+                        "description": "حذف قطاع\\n\\nCascade delete للخدمات والمناهج"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Clients API",
+            "item": [
+                {
+                    "name": "Get All Clients",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/clients",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "clients"
+                            ]
+                        },
+                        "description": "عرض جميع العملاء مع لوجوهاتهم"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Add Client",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "name",
+                                    "value": "أرامكو السعودية",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "logo",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/clients",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "clients"
+                            ]
+                        },
+                        "description": "إضافة عميل جديد مع لوجو"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Client",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "name",
+                                    "value": "أرامكو السعودية المحدثة",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "logo",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/clients/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "clients",
+                                "1"
+                            ]
+                        },
+                        "description": "⚠️ استخدم POST\\n\\nتحديث عميل موجود"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Client",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/clients/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "clients",
+                                "1"
+                            ]
+                        },
+                        "description": "حذف عميل مع اللوجو"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Certificates API",
+            "item": [
+                {
+                    "name": "Get All Certificates",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/certificates",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "certificates"
+                            ]
+                        },
+                        "description": "عرض جميع الشهادات مع الصور"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Certificate",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "name",
+                                    "value": "شهادة جديدة",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "image",
+                                    "type": "file",
+                                    "src": []
+                                },
+                                {
+                                    "key": "issue_date",
+                                    "value": "2024-01-01",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "issuing_authority",
+                                    "value": "جهة الإصدار",
+                                    "type": "text"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/certificates",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "certificates"
+                            ]
+                        },
+                        "description": "إضافة شهادة جديدة"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Certificate",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "name",
+                                    "value": "شهادة محدثة",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "image",
+                                    "type": "file",
+                                    "src": []
+                                },
+                                {
+                                    "key": "issue_date",
+                                    "value": "2024-02-01",
+                                    "type": "text"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/certificates/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "certificates",
+                                "1"
+                            ]
+                        },
+                        "description": "تحديث شهادة موجودة (نستخدم POST للصور)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Certificate",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/certificates/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "certificates",
+                                "1"
+                            ]
+                        },
+                        "description": "حذف شهادة"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Work Methods API",
+            "item": [
+                {
+                    "name": "Get All Work Methods",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/work-methods",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "work-methods"
+                            ]
+                        },
+                        "description": "عرض جميع طرق العمل (كيف ندير عملنا)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Work Method by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/work-methods/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "work-methods",
+                                "1"
+                            ]
+                        },
+                        "description": "عرض طريقة عمل محددة"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Work Method",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "title",
+                                    "value": "التخطيط الاستراتيجي",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "description",
+                                    "value": "نبدأ بفهم أهداف عملائنا ورؤيتهم المستقبلية، ثم نضع خطة استراتيجية متكاملة",
+                                    "type": "text"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/work-methods",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "work-methods"
+                            ]
+                        },
+                        "description": "إضافة طريقة عمل جديدة"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Work Method",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "title",
+                                    "value": "التخطيط الاستراتيجي المحدث",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "description",
+                                    "value": "شرح محدث لطريقة العمل",
+                                    "type": "text"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/work-methods/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "work-methods",
+                                "1"
+                            ]
+                        },
+                        "description": "تحديث طريقة عمل موجودة"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Work Method",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/work-methods/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "work-methods",
+                                "1"
+                            ]
+                        },
+                        "description": "حذف طريقة عمل"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "About Us API",
+            "item": [
+                {
+                    "name": "Get About Us Data",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/about-us",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "about-us"
+                            ]
+                        },
+                        "description": "عرض بيانات تعرف علينا (الرؤية، الرسالة، القيم) مجمعة"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update About Us Data",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "description",
+                                    "value": "وصف محدث للشركة...",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "vision[0][point]",
+                                    "value": "نقطة رؤية 1",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "vision[1][point]",
+                                    "value": "نقطة رؤية 2",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "mission[0][point]",
+                                    "value": "نقطة رسالة 1",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "values[0][point]",
+                                    "value": "قيمة 1",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "image",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/about-us",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "about-us"
+                            ]
+                        },
+                        "description": "تحديث بيانات تعرف علينا (يقوم بالتحديث إذا وجد سجل، أو الإنشاء إذا لم يوجد)"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Financial Services API",
+            "item": [
+                {
+                    "name": "Get All Financial Services",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/financial-services",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "financial-services"
+                            ]
+                        },
+                        "description": "عرض جميع خدمات القوائم المالية"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Financial Service by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/financial-services/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "financial-services",
+                                "1"
+                            ]
+                        },
+                        "description": "عرض خدمة مالية محددة"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Financial Service",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"القوائم المالية\",\n    \"price\": 5000,\n    \"description\": \"إعداد القوائم المالية\",\n    \"important_note\": \"الأسعار تشمل ضريبة القيمة المضافة\",\n    \"types\": [\n        {\n            \"title\": \"القوائم السنوية\",\n            \"description\": \"للشركات والمؤسسات\"\n        }\n    ],\n    \"work_mechanism\": [\n        {\n            \"title\": \"التحليل\",\n            \"description\": \"تحليل البيانات المالية\"\n        }\n    ],\n    \"financial_periods\": [\n        {\"period\": \"الربع الأول\"},\n        {\"period\": \"السنوي\"}\n    ]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/financial-services",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "financial-services"
+                            ]
+                        },
+                        "description": "إضافة خدمة مالية جديدة"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Financial Service",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"price\": 6000,\n    \"description\": \"وصف محدث\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/financial-services/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "financial-services",
+                                "1"
+                            ]
+                        },
+                        "description": "تحديث خدمة مالية موجودة"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Financial Service",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/financial-services/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "financial-services",
+                                "1"
+                            ]
+                        },
+                        "description": "حذف خدمة مالية"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Integration Services API",
+            "item": [
+                {
+                    "name": "Get All Integration Services",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/integration-services",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "integration-services"
+                            ]
+                        },
+                        "description": "عرض جميع خدمات تكامل الأنظمة"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Integration Service by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/integration-services/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "integration-services",
+                                "1"
+                            ]
+                        },
+                        "description": "عرض خدمة تكامل محددة"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Integration Service",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"خدمات تكامل الأنظمة\",\n    \"price\": 8500,\n    \"description\": \"حلول متكاملة لربط الأنظمة\",\n    \"important_note\": \"يتم تحديد التكلفة النهائية حسب عدد الأنظمة\",\n    \"types\": [\n        {\n            \"title\": \"API Integration\",\n            \"description\": \"ربط الأنظمة المختلفة\",\n            \"points\": [\n                {\"point\": \"تقليل الأخطاء\"},\n                {\"point\": \"تحديث لحظي\"}\n            ]\n        }\n    ]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/integration-services",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "integration-services"
+                            ]
+                        },
+                        "description": "إضافة خدمة تكامل جديدة"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Integration Service",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"price\": 9000\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/integration-services/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "integration-services",
+                                "1"
+                            ]
+                        },
+                        "description": "تحديث خدمة تكامل موجودة"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Integration Service",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/integration-services/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "integration-services",
+                                "1"
+                            ]
+                        },
+                        "description": "حذف خدمة تكامل"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Facility Services API",
+            "item": [
+                {
+                    "name": "Get All Facility Services",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/facility-services",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "facility-services"
+                            ]
+                        },
+                        "description": "عرض جميع خدمات إدارة المرافق"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Facility Service by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/facility-services/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "facility-services",
+                                "1"
+                            ]
+                        },
+                        "description": "عرض خدمة مرافق محددة"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Facility Service",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"إدارة المرافق\",\n    \"price\": 12000,\n    \"description\": \"خدمات شاملة لإدارة وصيانة المرافق\",\n    \"important_note\": \"الأسعار تختلف حسب المساحة\",\n    \"types\": [\n        {\n            \"title\": \"خدمات الصيانة\",\n            \"description\": \"صيانة دورية وقائية\",\n            \"items\": [\n                {\n                    \"title\": \"أنظمة التكييف\",\n                    \"description\": \"صيانة شاملة\",\n                    \"points\": [\n                        {\"point\": \"صيانة الوحدات\"},\n                        {\"point\": \"تنظيف الفلاتر\"}\n                    ]\n                }\n            ]\n        }\n    ]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/facility-services",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "facility-services"
+                            ]
+                        },
+                        "description": "إضافة خدمة إدارة مرافق جديدة"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Facility Service",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"price\": 13000\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/facility-services/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "facility-services",
+                                "1"
+                            ]
+                        },
+                        "description": "تحديث خدمة إدارة مرافق موجودة"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Facility Service",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/facility-services/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "facility-services",
+                                "1"
+                            ]
+                        },
+                        "description": "حذف خدمة إدارة مرافق"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Quote Requests API",
+            "item": [
+                {
+                    "name": "Submit Quote Request",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"full_name\": \"أحمد محمد\",\n    \"company_name\": \"شركة الأمثلة المحدودة\",\n    \"phone\": \"0501234567\",\n    \"email\": \"ahmed@example.com\",\n    \"service_type\": \"financial\",\n    \"budget_range\": \"50,000 - 100,000 ر.س\",\n    \"project_description\": \"نحتاج لإعداد القوائم المالية السنوية للشركة وفقاً للمعايير المحاسبية السعودية\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/quote-requests",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "quote-requests"
+                            ]
+                        },
+                        "description": "إرسال طلب عرض سعر جديد\n\nأنواع الخدمات المتاحة:\n- financial (القوائم المالية)\n- integration (خدمات تكامل الأنظمة)\n- facility (إدارة المرافق)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get All Quote Requests",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/quote-requests",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "quote-requests"
+                            ]
+                        },
+                        "description": "عرض جميع طلبات عروض الأسعار"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Quote Request by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/quote-requests/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "quote-requests",
+                                "1"
+                            ]
+                        },
+                        "description": "عرض طلب عرض سعر محدد"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Contact Messages API",
+            "item": [
+                {
+                    "name": "Submit Contact Message",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"full_name\": \"محمد علي\",\n    \"phone\": \"0509876543\",\n    \"email\": \"mohammed@example.com\",\n    \"message\": \"أود الاستفسار عن خدماتكم وكيفية التواصل معكم للحصول على المزيد من التفاصيل\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/contact-messages",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "contact-messages"
+                            ]
+                        },
+                        "description": "إرسال رسالة تواصل جديدة للإدارة"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get All Contact Messages",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/contact-messages",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "contact-messages"
+                            ]
+                        },
+                        "description": "جلب جميع رسائل التواصل"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Contact Message by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/contact-messages/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "contact-messages",
+                                "1"
+                            ]
+                        },
+                        "description": "جلب رسالة محددة (تتحول تلقائياً لحالة مقروءة عند الاطلاع)"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Newsletter Subscription API",
+            "item": [
+                {
+                    "name": "Subscribe to Newsletter",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"user@example.com\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/newsletter/subscribe",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "newsletter",
+                                "subscribe"
+                            ]
+                        },
+                        "description": "الاشتراك في النشرة البريدية\n\nملاحظات:\n- يتحقق من وجود البريد مسبقاً\n- إذا كان ملغي الاشتراك سابقاً، يتم إعادة تفعيله"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get All Newsletter Subscriptions",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/newsletter/subscriptions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "newsletter",
+                                "subscriptions"
+                            ]
+                        },
+                        "description": "جلب جميع الاشتراكات"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Contact Info API",
+            "item": [
+                {
+                    "name": "Get Contact Info",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/contact-info",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "contact-info"
+                            ]
+                        },
+                        "description": "الحصول على بيانات الاتصال الخاصة بالشركة"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Contact Info",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"phone\": \"+966 50 123 4567\",\n    \"email\": \"info@example.com\",\n    \"description\": \"نحن هنا لمساعدتك في أي استفسار\",\n    \"address\": \"الرياض، المملكة العربية السعودية\",\n    \"working_hours\": \"من الأحد إلى الخميس، 9 صباحاً - 5 مساءً\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/contact-info",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "contact-info"
+                            ]
+                        },
+                        "description": "تحديث/إنشاء بيانات الاتصال (نمط Singleton - سجل واحد فقط)"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Budget Ranges API",
+            "item": [
+                {
+                    "name": "Get All Budget Ranges",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/budget-ranges",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "budget-ranges"
+                            ]
+                        },
+                        "description": "الحصول على جميع نطاقات الأسعار النشطة\n\nيُستخدم في نموذج طلب عرض السعر للسماح للمستخدمين باختيار نطاق الميزانية"
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://127.0.0.1:8000"
+        }
+    ]
+}

@@ -3,23 +3,27 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PostResource\Pages;
+use App\Filament\Resources\PostResource\RelationManagers;
 use App\Models\Post;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class PostResource extends Resource
 {
     protected static ?string $model = Post::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
-    
-    protected static ?string $navigationLabel = 'المنشورات';
-    protected static ?string $pluralModelLabel = 'المنشورات';
+    protected static ?string $navigationIcon = 'heroicon-o-pencil-square';
+
     protected static ?string $modelLabel = 'منشور';
-    protected static ?string $navigationGroup = 'المحتوى';
+    protected static ?string $pluralModelLabel = 'المنشورات';
+    protected static ?string $navigationGroup = 'إدارة المحتوى';
+
+    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {
@@ -34,14 +38,11 @@ class PostResource extends Resource
                 Forms\Components\Textarea::make('content')
                     ->label('المحتوى')
                     ->maxLength(65535)
-                    ->rows(5)
                     ->columnSpanFull(),
                 Forms\Components\FileUpload::make('image')
-                    ->label('الصورة')
+                    ->label('الصور')
                     ->image()
-                    ->directory('post_images')
-                    ->visibility('public')
-                    ->columnSpanFull(),
+                    ->directory('post_images'),
             ]);
     }
 
@@ -53,16 +54,22 @@ class PostResource extends Resource
                     ->label('المستخدم')
                     ->searchable()
                     ->sortable(),
+                Tables\Columns\ImageColumn::make('image')
+                    ->label('الصورة'),
                 Tables\Columns\TextColumn::make('content')
                     ->label('المحتوى')
                     ->limit(50)
                     ->searchable(),
-                Tables\Columns\ImageColumn::make('image')
-                    ->label('الصورة'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاريخ النشر')
                     ->dateTime()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->label('تاريخ التحديث')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
@@ -78,19 +85,10 @@ class PostResource extends Resource
             ]);
     }
 
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
-    }
-
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListPosts::route('/'),
-            'create' => Pages\CreatePost::route('/create'),
-            'edit' => Pages\EditPost::route('/{record}/edit'),
+            'index' => Pages\ManagePosts::route('/'),
         ];
     }
 }

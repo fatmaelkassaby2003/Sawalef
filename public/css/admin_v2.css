@@ -1,0 +1,431 @@
+/* === Asalny Professional Sidebar Design - Final Version === */
+
+* {
+    font-family: 'Cairo', sans-serif !important;
+}
+
+/* === KEY FIX: Force Light Background for Main Content === */
+body,
+.fi-main,
+.fi-body,
+.fi-layout,
+main {
+    background-color: #f9fafb !important;
+    color: #000000 !important;
+}
+
+/* Ensure text in tables/cards is dark */
+.fi-ta-text,
+.fi-ta-row,
+.fi-ta-header-cell-label {
+    color: #0f172a !important;
+}
+
+.fi-header-heading {
+    color: #0f172a !important;
+}
+
+/* Dark Sidebar Theme */
+.fi-sidebar {
+    background-color: #111827 !important;
+    border-right-color: #1f2937 !important;
+}
+
+/* Sidebar Navigation Items Text */
+.fi-sidebar-item-label {
+    color: #e5e7eb !important;
+}
+
+/* Sidebar Group Labels */
+.fi-sidebar-group-label {
+    color: #9ca3af !important;
+}
+
+/* Sidebar Icons */
+.fi-sidebar-item-icon {
+    color: #9ca3af !important;
+}
+
+/* Active State (Selected Item) */
+.fi-sidebar-item.fi-active>.fi-sidebar-item-button {
+    background-color: #3b82f6 !important;
+    color: #ffffff !important;
+}
+
+.fi-sidebar-item.fi-active>.fi-sidebar-item-button .fi-sidebar-item-label {
+    color: #ffffff !important;
+}
+
+.fi-sidebar-item.fi-active>.fi-sidebar-item-button .fi-sidebar-item-icon {
+    color: #ffffff !important;
+}
+
+/* Hover State */
+.fi-sidebar-item:not(.fi-active)>.fi-sidebar-item-button:hover {
+    background-color: #1f2937 !important;
+}
+
+/* Dark Sidebar Theme & Layout Override */
+:root {
+    --fi-sidebar-width: 260px !important;
+}
+
+/* Sidebar Container */
+.fi-sidebar {
+    width: var(--fi-sidebar-width) !important;
+    background-color: #111827 !important;
+    border-right: 1px solid #1f2937 !important;
+}
+
+.fi-sidebar-nav {
+    background-color: #111827 !important;
+}
+
+/* Header/Brand Area */
+.fi-sidebar-header {
+    background-color: #111827 !important;
+    border-bottom: 1px solid #1f2937 !important;
+    display: flex;
+    justify-content: center !important;
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.5rem !important;
+}
+
+/* ============================================ */
+/* Dashboard Widget Heights - ONLY ON DASHBOARD */
+/* ============================================ */
+
+/* Only apply to dashboard page */
+.fi-page-dashboard .fi-wi-account,
+.fi-page-dashboard .fi-wi-account-custom,
+.fi-page-dashboard .asalny-welcome-widget {
+    height: 200px !important;
+    max-height: 200px !important;
+    min-height: 200px !important;
+}
+
+.fi-page-dashboard .fi-wi-account>.fi-section,
+.fi-page-dashboard .fi-wi-account-custom>.fi-section,
+.fi-page-dashboard .asalny-welcome-widget>.fi-section {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+}
+
+.fi-sidebar-header a {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+}
+
+.fi-sidebar-header .fi-logo {
+    display: contents;
+}
+
+/* Sidebar Group Labels */
+.fi-sidebar-group-label span {
+    color: #9ca3af !important;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+/* Show collapse arrows */
+.fi-sidebar-group-collapse-button {
+    display: flex !important;
+    color: #9ca3af !important;
+}
+
+/* TREE VIEW - LINES AND DOTS (RTL) */
+.fi-sidebar-group-items>ul {
+    position: relative;
+    padding-right: 20px !important;
+    border-right: 2px solid #374151 !important;
+    margin-right: 10px;
+}
+
+/* Connector Dot */
+.fi-sidebar-item>.fi-sidebar-item-button::before {
+    content: '';
+    position: absolute;
+    right: -26px;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    background-color: #4b5563;
+    border-radius: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    border: 2px solid #111827;
+}
+
+/* Active State Styles */
+.fi-sidebar-item.fi-active>.fi-sidebar-item-button {
+    background-color: #3b82f6 !important;
+    color: #ffffff !important;
+    border-radius: 6px;
+    padding-block: 8px;
+}
+
+/* Active Dot */
+.fi-sidebar-item.fi-active>.fi-sidebar-item-button::before {
+    background-color: #3b82f6 !important;
+    border-color: #1e3a8a;
+    width: 10px;
+    height: 10px;
+    right: -27px;
+}
+
+/* Item Text & Icons */
+.fi-sidebar-item-label {
+    color: #e5e7eb !important;
+    font-size: 0.9rem;
+}
+
+.fi-sidebar-item-icon {
+    color: #9ca3af !important;
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+/* Active Item Text & Icon */
+.fi-sidebar-item.fi-active .fi-sidebar-item-label,
+.fi-sidebar-item.fi-active .fi-sidebar-item-icon {
+    color: #ffffff !important;
+}
+
+/* Hover Effects */
+.fi-sidebar-item:not(.fi-active)>.fi-sidebar-item-button:hover {
+    background-color: #1f2937 !important;
+}
+
+/* ============================================ */
+/* Account Widget Content Centering - DASHBOARD ONLY */
+/* ============================================ */
+.fi-page-dashboard .fi-wi-account-content {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 1.5rem !important;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.fi-page-dashboard .fi-wi-account-user {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+}
+
+.fi-page-dashboard .fi-wi-account-user-info {
+    text-align: right !important;
+}
+
+.fi-page-dashboard .fi-wi-account-user-info h2 {
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+}
+
+.fi-page-dashboard .fi-wi-account-user-info p {
+    font-size: 0.75rem !important;
+    color: #6b7280 !important;
+    margin: 0 !important;
+}
+
+/* ============================================ */
+/* LOGIN PAGE SPACING FIXES - FILAMENT 3       */
+/* ============================================ */
+
+.fi-simple-main form {
+    gap: 0.5rem !important;
+}
+
+.fi-simple-main #form {
+    gap: 0.5rem !important;
+}
+
+.fi-simple-main .grid {
+    gap: 0.5rem !important;
+}
+
+.fi-simple-main .fi-input-wrp {
+    padding-block: 10px !important;
+}
+
+.fi-simple-main .fi-fo-field-wrp-label {
+    margin-bottom: 0.25rem !important;
+}
+
+.fi-simple-main .fi-form-actions {
+    margin-top: 0.5rem !important;
+}
+
+.fi-simple-main .fi-fo-field-wrp:has(input[type="checkbox"]) {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+.fi-simple-main .fi-section-content {
+    padding: 1.5rem !important;
+}
+
+.fi-simple-header {
+    margin-bottom: 1rem !important;
+}
+
+/* ============================================ */
+/* TABLE ACTIONS CENTERING                      */
+/* ============================================ */
+
+/* Force center everything in actions column */
+.fi-ta-header-cell:last-child,
+.fi-ta-header-cell:last-child * {
+    text-align: center !important;
+    justify-content: center !important;
+}
+
+.fi-ta-cell:last-child,
+.fi-ta-cell:last-child * {
+    text-align: center !important;
+    justify-content: center !important;
+}
+
+/* Force actions container to center */
+.fi-ta-actions,
+.fi-ta-row-actions {
+    display: flex !important;
+    justify-content: center !important;
+    width: 100% !important;
+}
+
+/* Force dropdown and action links to center */
+.fi-ta-cell .fi-dropdown,
+.fi-ta-cell .fi-link,
+.fi-ta-cell .fi-ac-btn-action,
+.fi-ta-cell a {
+    display: inline-flex !important;
+    justify-content: center !important;
+    margin: 0 auto !important;
+}
+
+/* Center the action column content wrapper */
+.fi-ta-cell:last-child>div {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+}
+
+/* ============================================ */
+/* ============================================ */
+/* LOGIN PAGE SPECIFIC BRANDING                */
+/* ============================================ */
+
+/* On login page: hide custom brand text, show only logo */
+.fi-simple-page .brand-text {
+    display: none !important;
+}
+
+/* On login page: ensure logo is centered and sized */
+.fi-simple-page .brand-logo {
+    height: 5rem !important;
+    width: auto !important;
+    margin: 0 auto;
+}
+
+/* Move login button down a bit */
+.fi-simple-page .fi-btn-primary,
+.fi-simple-page button[type="submit"] {
+    margin-top: 2rem !important;
+}
+
+/* Ensure password toggle and remember me are clickable */
+.fi-simple-page .fi-input-wrp,
+.fi-simple-page .fi-input-wrp-suffix,
+.fi-simple-page button[type="button"],
+.fi-simple-page input[type="checkbox"] {
+    position: relative !important;
+    z-index: 10 !important;
+    pointer-events: auto !important;
+}
+
+.fi-simple-page .fi-fo-field-wrp {
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+/* ============================================ */
+/* SIDEBAR VS LOGIN PAGE BRAND DISPLAY         */
+/* ============================================ */
+
+/* On sidebar: hide logo, show text only */
+.fi-sidebar .brand-logo {
+    display: none !important;
+}
+
+/* On login page: hide text, show logo only */
+.fi-simple-page .brand-text {
+    display: none !important;
+}
+
+.fi-simple-page .brand-logo {
+    height: 4rem !important;
+    width: auto !important;
+}
+
+/* Brand name styling */
+.fi-sidebar-header .fi-logo {
+    color: #ffffff !important;
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+/* ============================================ */
+/* IMAGE COLUMN ALIGNMENT IN TABLES            */
+/* ============================================ */
+
+/* Reset padding for image columns */
+.fi-ta-header-cell:first-child,
+.fi-ta-cell:first-child {
+    padding-inline-start: 1rem !important;
+}
+
+/* Align image content to match header text position */
+.fi-ta-image {
+    display: flex !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+}
+
+/* ============================================ */
+/* COMPACT ACTIONS SPACING                     */
+/* ============================================ */
+
+/* Reduce gap between action icons */
+.fi-ta-actions {
+    gap: 0 !important;
+    display: flex !important;
+}
+
+/* Remove margins and reduce padding on action buttons */
+.fi-ta-actions .fi-icon-btn,
+.fi-ta-actions a,
+.fi-ta-actions button {
+    margin: 0 !important;
+    padding: 0.25rem !important;
+    /* Minimal padding for clickability */
+}
+
+/* Force icons to be fully visible */
+.fi-ta-actions .fi-icon-btn {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+/* Hover effect */
+.fi-ta-actions .fi-icon-btn:hover {
+    background-color: rgba(0, 0, 0, 0.05) !important;
+}

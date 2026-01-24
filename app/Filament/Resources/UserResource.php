@@ -18,61 +18,35 @@ class UserResource extends Resource
     protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
-    
-    protected static ?string $navigationLabel = 'المستخدمين';
-    protected static ?string $pluralModelLabel = 'المستخدمين';
+
     protected static ?string $modelLabel = 'مستخدم';
-    protected static ?string $navigationGroup = 'المحتوى';
+    protected static ?string $pluralModelLabel = 'المستخدمين';
+    protected static ?string $navigationGroup = 'إدارة المحتوى';
+
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('معلومات المستخدم')
-                    ->schema([
-                        Forms\Components\TextInput::make('name')
-                            ->label('الاسم')
-                            ->required()
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('nickname')
-                            ->label('اللقب')
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('phone')
-                            ->label('رقم الهاتف')
-                            ->tel()
-                            ->required()
-                            ->maxLength(15),
-                        Forms\Components\TextInput::make('age')
-                            ->label('العمر')
-                            ->numeric()
-                            ->minValue(1)
-                            ->maxValue(150),
-                        Forms\Components\Select::make('gender')
-                            ->label('الجنس')
-                            ->options([
-                                'male' => 'ذكر',
-                                'female' => 'أنثى',
-                            ]),
-                    ])->columns(2),
-                
-                Forms\Components\Section::make('الموقع الجغرافي')
-                    ->schema([
-                        Forms\Components\TextInput::make('country_ar')
-                            ->label('الدولة (عربي)')
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('country_en')
-                            ->label('الدولة (انجليزي)')
-                            ->maxLength(255),
-                    ])->columns(2),
-
-                Forms\Components\Section::make('الصورة الشخصية')
-                    ->schema([
-                        Forms\Components\FileUpload::make('profile_image')
-                            ->label('الصورة')
-                            ->image()
-                            ->directory('profile_images')
-                            ->visibility('public'),
-                    ])
+                Forms\Components\TextInput::make('name')
+                    ->label('الاسم')
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('email')
+                    ->label('البريد الإلكتروني')
+                    ->email()
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\DateTimePicker::make('email_verified_at')
+                    ->label('تاريخ تأكيد البريد'),
+                Forms\Components\TextInput::make('password')
+                    ->label('كلمة المرور')
+                    ->password()
+                    ->dehydrateStateUsing(fn ($state) => \Illuminate\Support\Facades\Hash::make($state))
+                    ->dehydrated(fn ($state) => filled($state))
+                    ->required(fn (string $context): bool => $context === 'create')
+                    ->maxLength(255),
             ]);
     }
 
@@ -80,59 +54,23 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\ImageColumn::make('profile_image')
-                    ->label('الصورة')
-                    ->circular(),
                 Tables\Columns\TextColumn::make('name')
                     ->label('الاسم')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('nickname')
-                    ->label('اللقب')
-                    ->searchable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('phone')
-                    ->label('رقم الهاتف')
+                Tables\Columns\TextColumn::make('email')
+                    ->label('البريد الإلكتروني')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('age')
-                    ->label('العمر')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('country_ar')
-                    ->label('الدولة (عربي)')
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('country_en')
-                    ->label('الدولة (انجليزي)')
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('gender')
-                    ->label('الجنس')
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'male' => 'ذكر',
-                        'female' => 'أنثى',
-                        default => $state,
-                    })
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'male' => 'info',
-                        'female' => 'danger',
-                        default => 'gray',
-                    }),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاريخ التسجيل')
                     ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('gender')
-                    ->label('الجنس')
-                    ->options([
-                        'male' => 'ذكر',
-                        'female' => 'أنثى',
-                    ]),
+                //
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -141,19 +79,10 @@ class UserResource extends Resource
             ]);
     }
 
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
-    }
-
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListUsers::route('/'),
-            'create' => Pages\CreateUser::route('/create'),
-            'edit' => Pages\EditUser::route('/{record}/edit'),
+            'index' => Pages\ManageUsers::route('/'),
         ];
     }
 }

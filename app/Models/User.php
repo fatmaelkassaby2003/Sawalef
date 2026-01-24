@@ -3,16 +3,12 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Filament\Models\Contracts\FilamentUser;
-use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class User extends Authenticatable implements FilamentUser
+class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -23,16 +19,9 @@ class User extends Authenticatable implements FilamentUser
      */
     protected $fillable = [
         'name',
-        'phone',
-        'is_admin',
-        'nickname',
-        'age',
-        'country_ar',
-        'country_en',
-        'gender',
-        'profile_image',
-        'last_otp',
-        'last_otp_expires_at',
+        'email',
+        'password',
+        'email_verified_at',
     ];
 
     /**
@@ -41,8 +30,8 @@ class User extends Authenticatable implements FilamentUser
      * @var array<int, string>
      */
     protected $hidden = [
+        'password',
         'remember_token',
-        'last_otp',
     ];
 
     /**
@@ -51,28 +40,17 @@ class User extends Authenticatable implements FilamentUser
      * @var array<string, string>
      */
     protected $casts = [
-        'last_otp_expires_at' => 'datetime',
-        'is_admin' => 'boolean',
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
     ];
 
-    public function canAccessPanel(Panel $panel): bool
-    {
-        return $this->is_admin;
-    }
-
-    /**
-     * The hobbies that belong to the user.
-     */
-    public function hobbies(): BelongsToMany
-    {
-        return $this->belongsToMany(Hobby::class, 'user_hobbies');
-    }
-
-    /**
-     * Get the posts for the user.
-     */
-    public function posts(): HasMany
+    public function posts()
     {
         return $this->hasMany(Post::class);
+    }
+
+    public function hobbies()
+    {
+        return $this->belongsToMany(Hobby::class, 'hobby_user', 'user_id', 'hobby_id')->withTimestamps();
     }
 }

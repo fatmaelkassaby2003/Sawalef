@@ -19,6 +19,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Force Arabic locale and RTL direction
+        app()->setLocale('ar');
+        if (class_exists(\Filament\Facades\Filament::class)) {
+            \Filament\Facades\Filament::serving(function () {
+                \Filament\Facades\Filament::registerRenderHook(
+                    'panels::body.start',
+                    fn () => '<style>html { direction: rtl !important; }</style>'
+                );
+            });
+        }
     }
 }
