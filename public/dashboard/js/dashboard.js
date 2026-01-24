@@ -1,7 +1,7 @@
 // API Configuration
 const getBaseUrl = () => {
     const hostname = window.location.hostname;
-    
+
     // Explicitly check for production domain
     if (hostname.includes('ahdafweb.com')) {
         // ALWAYS use this path for production
@@ -422,7 +422,7 @@ function renderUsers(data) {
             <td style="color: var(--text-muted);">${user.nickname || '-'}</td>
             <td>${user.phone || '-'}</td>
             <td>${user.age || '-'}</td>
-            <td>${user.country || '-'}</td>
+            <td>${user.country_ar || user.country_en || '-'}</td>
             <td><span class="badge ${user.gender}">${user.gender === 'male' ? 'ذكر' : 'أنثى'}</span></td>
             <td>${user.posts_count}</td>
             <td>${user.hobbies_count}</td>
@@ -431,7 +431,7 @@ function renderUsers(data) {
     `).join('');
 
     // Populate country filter
-    const countries = [...new Set(data.users.map(u => u.country).filter(Boolean))];
+    const countries = [...new Set(data.users.map(u => u.country_ar || u.country_en).filter(Boolean))];
     const countryFilter = document.getElementById('countryFilter');
     if (countryFilter && countries.length > 0) {
         countryFilter.innerHTML = '<option value="">كل الدول</option>' +

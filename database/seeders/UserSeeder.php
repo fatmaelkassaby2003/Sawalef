@@ -20,7 +20,8 @@ class UserSeeder extends Seeder
                 'phone' => '01234567891',
                 'nickname' => 'أحمد',
                 'age' => 25,
-                'country' => 'مصر',
+                'country_ar' => 'مصر',
+                'country_en' => 'Egypt',
                 'gender' => 'male',
             ],
             [
@@ -28,7 +29,8 @@ class UserSeeder extends Seeder
                 'phone' => '01234567892',
                 'nickname' => 'فطوم',
                 'age' => 23,
-                'country' => 'السعودية',
+                'country_ar' => 'السعودية',
+                'country_en' => 'Saudi Arabia',
                 'gender' => 'female',
             ],
             [
@@ -36,7 +38,8 @@ class UserSeeder extends Seeder
                 'phone' => '01234567893',
                 'nickname' => 'محمد',
                 'age' => 28,
-                'country' => 'الإمارات',
+                'country_ar' => 'الإمارات',
+                'country_en' => 'UAE',
                 'gender' => 'male',
             ],
             [
@@ -44,7 +47,8 @@ class UserSeeder extends Seeder
                 'phone' => '01234567894',
                 'nickname' => 'سارة',
                 'age' => 22,
-                'country' => 'مصر',
+                'country_ar' => 'مصر',
+                'country_en' => 'Egypt',
                 'gender' => 'female',
             ],
             [
@@ -52,7 +56,8 @@ class UserSeeder extends Seeder
                 'phone' => '01234567895',
                 'nickname' => 'عمر',
                 'age' => 30,
-                'country' => 'الكويت',
+                'country_ar' => 'الكويت',
+                'country_en' => 'Kuwait',
                 'gender' => 'male',
             ],
         ];

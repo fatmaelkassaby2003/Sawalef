@@ -48,7 +48,8 @@ class MatchController extends Controller
                     'name' => $otherUser->name,
                     'nickname' => $otherUser->nickname,
                     'age' => $otherUser->age,
-                    'country' => $otherUser->country,
+                    'country_ar' => $otherUser->country_ar,
+                    'country_en' => $otherUser->country_en,
                     'gender' => $otherUser->gender,
                     'profile_image' => $otherUser->profile_image ? asset('storage/' . $otherUser->profile_image) : null,
                     'match_percentage' => round($matchPercentage, 2),
@@ -112,7 +113,10 @@ class MatchController extends Controller
 
         // Find users from the specified country with at least 80% hobby match
         $query = User::where('id', '!=', $currentUser->id)
-            ->where('country', $searchCountry);
+            ->where(function($q) use ($searchCountry) {
+                $q->where('country_ar', $searchCountry)
+                  ->orWhere('country_en', $searchCountry);
+            });
         
         // Exclude previously shown users
         if (!empty($excludeUserIds)) {
@@ -163,7 +167,8 @@ class MatchController extends Controller
                 'name' => $randomUser->name,
                 'nickname' => $randomUser->nickname,
                 'age' => $randomUser->age,
-                'country' => $randomUser->country,
+                'country_ar' => $randomUser->country_ar,
+                'country_en' => $randomUser->country_en,
                 'gender' => $randomUser->gender,
                 'profile_image' => $randomUser->profile_image ? asset('storage/' . $randomUser->profile_image) : null,
                 'phone' => $randomUser->phone,
@@ -225,7 +230,10 @@ class MatchController extends Controller
 
         // Apply filters
         if ($request->filled('country')) {
-            $query->where('country', $request->country);
+            $query->where(function($q) use ($request) {
+                $q->where('country_ar', $request->country)
+                  ->orWhere('country_en', $request->country);
+            });
         }
 
         if ($request->filled('gender')) {
@@ -263,7 +271,8 @@ class MatchController extends Controller
                     'name' => $user->name,
                     'nickname' => $user->nickname,
                     'age' => $user->age,
-                    'country' => $user->country,
+                    'country_ar' => $user->country_ar,
+                    'country_en' => $user->country_en,
                     'gender' => $user->gender,
                     'profile_image' => $user->profile_image ? asset('storage/' . $user->profile_image) : null,
                     'match_percentage' => round($matchPercentage, 2),

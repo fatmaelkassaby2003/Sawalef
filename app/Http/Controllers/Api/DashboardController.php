@@ -36,9 +36,9 @@ class DashboardController extends Controller
                 ->mapWithKeys(fn($item) => [$item->gender ?? 'unknown' => $item->count]);
             
             // Top countries
-            $topCountries = User::select('country', DB::raw('count(*) as count'))
-                ->whereNotNull('country')
-                ->groupBy('country')
+            $topCountries = User::select('country_en', DB::raw('count(*) as count'))
+                ->whereNotNull('country_en')
+                ->groupBy('country_en')
                 ->orderByDesc('count')
                 ->limit(5)
                 ->get();
@@ -84,11 +84,18 @@ class DashboardController extends Controller
             $sortBy = $request->input('sort_by', 'created_at');
             $sortOrder = $request->input('sort_order', 'desc');
             
+            if ($sortBy === 'country') {
+                $sortBy = 'country_en';
+            }
+            
             $query = User::query();
             
             // Apply filters
             if ($request->filled('country')) {
-                $query->where('country', $request->country);
+                $query->where(function($q) use ($request) {
+                    $q->where('country_ar', $request->country)
+                      ->orWhere('country_en', $request->country);
+                });
             }
             
             if ($request->filled('gender')) {
@@ -160,7 +167,8 @@ class DashboardController extends Controller
                             'nickname' => $user->nickname,
                             'phone' => $user->phone,
                             'age' => $user->age,
-                            'country' => $user->country,
+                            'country_ar' => $user->country_ar,
+                            'country_en' => $user->country_en,
                             'gender' => $user->gender,
                             'profile_image' => $profileImage,
                             'posts_count' => $user->posts_count ?? 0,
@@ -327,9 +335,9 @@ class DashboardController extends Controller
                 });
             
             // Country distribution
-            $countryStats = User::select('country', DB::raw('count(*) as count'))
-                ->whereNotNull('country')
-                ->groupBy('country')
+            $countryStats = User::select('country_en', DB::raw('count(*) as count'))
+                ->whereNotNull('country_en')
+                ->groupBy('country_en')
                 ->orderByDesc('count')
                 ->get();
             

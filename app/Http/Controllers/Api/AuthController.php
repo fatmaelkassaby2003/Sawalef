@@ -25,24 +25,24 @@ class AuthController extends Controller
     public function register(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'name'     => 'required|string|max:255',
-            'phone'    => 'required|string|min:10|max:15|unique:users,phone',
-            'nickname' => 'nullable|string|max:255',
-            'age'      => 'nullable|integer|min:1|max:150',
-            'country'  => 'nullable|string|max:255',
-            'gender'   => 'nullable|in:male,female',
+            'name'       => 'required|string|max:255',
+            'phone'      => 'required|string|min:10|max:15|unique:users,phone',
+            'nickname'   => 'nullable|string|max:255',
+            'age'        => 'nullable|integer|min:1|max:150',
+            'country_ar' => 'nullable|string|max:255',
+            'country_en' => 'nullable|string|max:255',
+            'gender'     => 'nullable|in:male,female',
         ]);
 
         if ($validator->fails()) {
             return $this->validationError($validator);
         }
 
-        $user = User::create($request->only(['name', 'phone', 'nickname', 'age', 'country', 'gender']));
+        $user = User::create($request->only(['name', 'phone', 'nickname', 'age', 'country_ar', 'country_en', 'gender']));
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return $this->successResponse('Account created successfully', $user, $token, 201);
     }
-
     /**
      * Login - Send OTP to registered phone number
      */
@@ -120,10 +120,6 @@ class AuthController extends Controller
             'user'    => $this->formatUser($request->user()),
         ]);
     }
-
-    /**
-     * Update user profile
-     */
     public function updateProfile(Request $request): JsonResponse
     {
         $user = $request->user();
@@ -132,7 +128,8 @@ class AuthController extends Controller
             'name'          => 'nullable|string|max:255',
             'nickname'      => 'nullable|string|max:255',
             'age'           => 'nullable|integer|min:1|max:150',
-            'country'       => 'nullable|string|max:255',
+            'country_ar'    => 'nullable|string|max:255',
+            'country_en'    => 'nullable|string|max:255',
             'gender'        => 'nullable|in:male,female',
             'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
@@ -142,7 +139,7 @@ class AuthController extends Controller
         }
 
         $updateData = array_filter(
-            $request->only(['name', 'nickname', 'age', 'country', 'gender']),
+            $request->only(['name', 'nickname', 'age', 'country_ar', 'country_en', 'gender']),
             fn($value) => !is_null($value)
         );
 
@@ -184,10 +181,6 @@ class AuthController extends Controller
     | Helper Methods
     |--------------------------------------------------------------------------
     */
-
-    /**
-     * Format user data for API response
-     */
     private function formatUser(User $user): array
     {
         return [
@@ -196,7 +189,8 @@ class AuthController extends Controller
             'phone'         => $user->phone,
             'nickname'      => $user->nickname,
             'age'           => $user->age,
-            'country'       => $user->country,
+            'country_ar'    => $user->country_ar,
+            'country_en'    => $user->country_en,
             'gender'        => $user->gender,
             'profile_image' => $user->profile_image 
                 ? (str_starts_with($user->profile_image, 'http') 
