@@ -4,7 +4,6 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\HobbyController;
 use App\Http\Controllers\Api\MatchController;
 use App\Http\Controllers\Api\PostController;
-use App\Http\Controllers\Api\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -61,14 +60,5 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
     Route::post('/hobbies', [HobbyController::class, 'store']); // Create hobby
     Route::post('/hobbies/{id}', [HobbyController::class, 'update']); // Update hobby (POST for file upload)
     Route::delete('/hobbies/{id}', [HobbyController::class, 'destroy']); // Delete hobby
-});
-
-// Dashboard analytics (public for development - add auth later)
-Route::prefix('admin/dashboard')->group(function () {
-    Route::get('/statistics', [DashboardController::class, 'statistics']);
-    Route::get('/users', [DashboardController::class, 'users']);
-    Route::get('/posts', [DashboardController::class, 'posts']);
-    Route::get('/hobbies', [DashboardController::class, 'hobbies']);
-    Route::get('/matches', [DashboardController::class, 'matches']);
 });
 
