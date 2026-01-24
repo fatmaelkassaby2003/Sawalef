@@ -225,7 +225,7 @@ function initCountriesChart(data) {
         countriesChart.destroy();
     }
 
-    const labels = data.map(item => item.country_en);
+    const labels = data.map(item => item.country_en || item.country);
     const values = data.map(item => item.count);
 
     const colors = [
@@ -377,7 +377,7 @@ function updateCountryDistributionChart(data) {
 
     // Get top 8 countries
     const topCountries = data.slice(0, 8);
-    const labels = topCountries.map(item => item.country_en);
+    const labels = topCountries.map(item => item.country_en || item.country);
     const values = topCountries.map(item => item.count);
 
     const colors = [
