@@ -16,6 +16,11 @@ class OTPService
         $token = env('TWILIO_TOKEN');
         $this->verifySid = env('TWILIO_VERIFY_SID');
         
+        if (empty($sid) || empty($token)) {
+            \Log::error('Twilio Configuration Missing: TWILIO_SID or TWILIO_TOKEN is not set in .env');
+            return;
+        }
+
         $this->twilio = new Client($sid, $token);
     }
 
@@ -39,6 +44,11 @@ class OTPService
                 $phone = '+20' . ltrim($phone, '0');
             }
 
+            if (!$this->twilio || empty($this->verifySid)) {
+                \Log::error('Twilio client not initialized or Verify SID is missing.');
+                return false;
+            }
+
             $verification = $this->twilio->verify->v2
                 ->services($this->verifySid)
                 ->verifications
@@ -60,6 +70,11 @@ class OTPService
             // Ensure phone number has country code
             if (!str_starts_with($phone, '+')) {
                 $phone = '+20' . ltrim($phone, '0');
+            }
+
+            if (!$this->twilio || empty($this->verifySid)) {
+                \Log::error('Twilio client not initialized or Verify SID is missing.');
+                return false;
             }
 
             $verificationCheck = $this->twilio->verify->v2
