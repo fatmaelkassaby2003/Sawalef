@@ -176,15 +176,18 @@
             const transactionId = '{{ $transactionId }}';
             const amount = '{{ $amount }}';
             
-            // Redirect to success page with test data
-            window.location.href = `/payment/success.php?transaction_id=${transactionId}&amount=${amount}&status=paid&test_mode=true`;
+            // Redirect to API callback to update balance
+            // Using Laravel's url() helper to ensure correct path
+            const baseUrl = "{{ url('/') }}";
+            window.location.href = `${baseUrl}/api/fawaterak/test-callback?transaction_id=${transactionId}&status=paid`;
         }
         
         function simulateFail() {
             const transactionId = '{{ $transactionId }}';
+            const baseUrl = "{{ url('/') }}";
             
             // Redirect to failed page
-            window.location.href = `/payment/failed.php?transaction_id=${transactionId}&test_mode=true`;
+            window.location.href = `${baseUrl}/payment/failed.php?transaction_id=${transactionId}&test_mode=true`;
         }
     </script>
 </body>

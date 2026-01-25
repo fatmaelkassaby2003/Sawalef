@@ -161,4 +161,28 @@ class FawaterakWebhookController extends Controller
             'status' => $status,
         ]);
     }
+
+    /**
+     * Handle Test Mode Callback (Simulate Payment)
+     */
+    public function testCallback(Request $request)
+    {
+        $transactionId = $request->input('transaction_id');
+        $status = $request->input('status');
+
+        if ($status !== 'paid') {
+            return redirect(config('fawaterak.failure_url') . '?error=payment_cancelled');
+        }
+
+        $transaction = WalletTransaction::find($transactionId);
+
+        if (!$transaction) {
+            return redirect(config('fawaterak.failure_url') . '?error=transaction_not_found');
+        }
+
+        // Process successful payment
+        $this->handleSuccessfulPayment($transaction);
+
+        return redirect(config('fawaterak.success_url') . '?transaction=' . $transaction->reference_number);
+    }
 }

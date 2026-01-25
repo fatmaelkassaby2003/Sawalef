@@ -86,5 +86,6 @@ Route::prefix('fawaterak')->group(function () {
     Route::post('/webhook', [FawaterakWebhookController::class, 'webhook']); // Payment webhook
     Route::get('/callback', [FawaterakWebhookController::class, 'callback']); // Payment callback (redirect)
     Route::post('/callback', [FawaterakWebhookController::class, 'callback']); // Payment callback (POST)
+    Route::get('/test-callback', [FawaterakWebhookController::class, 'testCallback']); // Test payment callback
 });
 
