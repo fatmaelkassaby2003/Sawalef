@@ -13,7 +13,11 @@ class FawaterakService
     public function __construct()
     {
         $this->apiKey = config('fawaterak.api_key');
-        $this->baseUrl = config('fawaterak.base_url');
+        $this->baseUrl = config('fawaterak.base_url', 'https://staging.fawaterk.com/api/v2'); // Default to staging if not set
+
+        if (empty($this->apiKey)) {
+            Log::error('Fawaterak API Key is missing in configuration!');
+        }
     }
 
     /**
@@ -108,6 +112,44 @@ class FawaterakService
             return [
                 'success' => false,
                 'message' => 'فشل في الحصول على بيانات الفاتورة'
+            ];
+
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'حدث خطأ: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Get available payment methods
+     * 
+     * @return array
+     */
+    public function getPaymentMethods()
+    {
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Content-Type' => 'application/json',
+            ])->get($this->baseUrl . '/getPaymentmethods');
+
+            if ($response->successful()) {
+                return [
+                    'success' => true,
+                    'data' => $response->json()['data'] ?? []
+                ];
+            }
+
+            Log::error('Fawaterak Payment Methods Error', [
+                'status' => $response->status(),
+                'body' => $response->body()
+            ]);
+
+            return [
+                'success' => false,
+                'message' => 'فشل في جلب طرق الدفع'
             ];
 
         } catch (\Exception $e) {

@@ -75,13 +75,43 @@ class WalletController extends Controller
     }
 
     /**
+     * Get available payment methods from Fawaterak
+     */
+    public function paymentMethods()
+    {
+        try {
+            $result = $this->fawaterakService->getPaymentMethods();
+
+            if (!$result['success']) {
+                return response()->json([
+                    'status' => false,
+                    'message' => $result['message']
+                ], 500);
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'تم جلب طرق الدفع بنجاح',
+                'data' => $result['data']
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'حدث خطأ أثناء جلب طرق الدفع',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Initiate deposit (charge wallet)
      */
     public function initiateDeposit(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'amount' => 'required|numeric|min:10',
-            'payment_method_id' => 'required|integer|in:1,2,4,5', // 1=Card, 2=Vodafone, 4=Meeza, 5=Fawry
+            'payment_method_id' => 'required|integer', 
         ]);
 
         if ($validator->fails()) {

@@ -21,7 +21,7 @@ use App\Http\Controllers\Api\FawaterakWebhookController;
 
 // Public authentication routes
 Route::post('/register', [AuthController::class, 'register']); // Register new account
-Route::post('/login', [AuthController::class, 'login']); // Send OTP to phone
+Route::post('/login', [AuthController::class, 'login'])->name('login'); // Send OTP to phone
 Route::post('/verify', [AuthController::class, 'verify']); // Verify OTP code
 
 // Public hobby routes
@@ -66,6 +66,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('wallet')->group(function () {
         Route::get('/balance', [WalletController::class, 'getBalance']); // Get wallet balance and gems
         Route::get('/transactions', [WalletController::class, 'getTransactions']); // Get transaction history
+        Route::get('/payment-methods', [WalletController::class, 'paymentMethods']); // Get available payment methods
         Route::post('/deposit', [WalletController::class, 'initiateDeposit']); // Charge wallet (initiate payment)
         Route::post('/withdrawal', [WalletController::class, 'initiateWithdrawal']); // Withdraw from wallet
         Route::post('/purchase-package', [WalletController::class, 'purchasePackage']); // Purchase package with wallet balance
