@@ -75,7 +75,7 @@ class User extends Authenticatable implements FilamentUser
 
     public function hobbies()
     {
-        return $this->belongsToMany(Hobby::class, 'hobby_user', 'user_id', 'hobby_id')->withTimestamps();
+        return $this->belongsToMany(Hobby::class, 'user_hobbies', 'user_id', 'hobby_id');
     }
 
     public function walletTransactions()

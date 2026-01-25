@@ -4,9 +4,9 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\HobbyController;
 use App\Http\Controllers\Api\MatchController;
 use App\Http\Controllers\Api\PostController;
-use App\Http\Controllers\API\PackageController;
-use App\Http\Controllers\API\WalletController;
-use App\Http\Controllers\API\FawaterakWebhookController;
+use App\Http\Controllers\Api\PackageController;
+use App\Http\Controllers\Api\WalletController;
+use App\Http\Controllers\Api\FawaterakWebhookController;
 
 /*
 |--------------------------------------------------------------------------

@@ -11,9 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_hobbies', function (Blueprint $table) {
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('hobby_id')->constrained()->onDelete('cascade');
+        Schema::create('hobby_user', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('hobby_id')->constrained()->cascadeOnDelete();
+            $table->timestamps();
+            
+            // Prevent duplicate entries for the same user and hobby
             $table->unique(['user_id', 'hobby_id']);
         });
     }
@@ -23,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_hobbies');
+        Schema::dropIfExists('hobby_user');
     }
 };
