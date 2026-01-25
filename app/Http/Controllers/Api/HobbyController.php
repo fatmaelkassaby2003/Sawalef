@@ -70,6 +70,37 @@ class HobbyController extends Controller
         $user = $request->user();
         $user->hobbies()->sync($request->hobby_ids);
 
+        // Notify other users with similar hobbies
+        try {
+            $fcmService = app(\App\Services\FCMService::class);
+            $hobbyIds = $request->hobby_ids;
+            
+            // Find users with at least one shared hobby (excluding current user)
+            $similarUsers = \App\Models\User::where('id', '!=', $user->id)
+                ->whereHas('hobbies', function ($query) use ($hobbyIds) {
+                    $query->whereIn('hobbies.id', $hobbyIds);
+                })
+                ->whereNotNull('fcm_token')
+                ->limit(10) // Limit notifications to avoid spamming
+                ->get();
+                
+            foreach ($similarUsers as $similarUser) {
+                // Find first shared hobby name for the massage
+                $sharedHobby = $similarUser->hobbies()
+                    ->whereIn('hobbies.id', $hobbyIds)
+                    ->first();
+
+                $fcmService->sendToUser(
+                    $similarUser->id,
+                    'شخص جديد يشاركك اهتماماتك! ✨',
+                    "{$user->name} يهتم بـ {$sharedHobby->name} أيضاً. تواصل معه الآن!",
+                    ['type' => 'similar_hobbies', 'user_id' => $user->id]
+                );
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('FCM Similar Hobbies Error: ' . $e->getMessage());
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Hobbies updated successfully',

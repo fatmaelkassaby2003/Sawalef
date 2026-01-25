@@ -23,7 +23,7 @@ class PostResource extends Resource
     protected static ?string $pluralModelLabel = 'المنشورات';
     protected static ?string $navigationGroup = 'إدارة المحتوى';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 5;
 
     public static function form(Form $form): Form
     {

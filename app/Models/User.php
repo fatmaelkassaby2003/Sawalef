@@ -6,14 +6,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 
-class User extends Authenticatable implements FilamentUser
+class User extends Authenticatable implements FilamentUser, JWTSubject
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasFactory, Notifiable;
 
     public function canAccessPanel(Panel $panel): bool
     {
@@ -42,6 +42,7 @@ class User extends Authenticatable implements FilamentUser
         'is_admin',
         'wallet_balance',
         'gems',
+        'fcm_token',
     ];
 
     /**
@@ -86,5 +87,30 @@ class User extends Authenticatable implements FilamentUser
     public function packagePurchases()
     {
         return $this->hasMany(PackagePurchase::class);
+    }
+
+    public function siteNotifications()
+    {
+        return $this->hasMany(SiteNotification::class);
+    }
+
+    /**
+     * Get the identifier that will be stored in the subject claim of the JWT.
+     *
+     * @return mixed
+     */
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Return a key value array, containing any custom claims to be added to the JWT.
+     *
+     * @return array
+     */
+    public function getJWTCustomClaims()
+    {
+        return [];
     }
 }

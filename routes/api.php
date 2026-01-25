@@ -28,11 +28,18 @@ Route::post('/verify', [AuthController::class, 'verify']); // Verify OTP code
 Route::get('/hobbies', [HobbyController::class, 'index']); // List all hobbies
 
 // Protected routes (require authentication)
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth:api')->group(function () {
     // Profile management
     Route::get('/profile', [AuthController::class, 'profile']);
     Route::post('/update-profile', [AuthController::class, 'updateProfile']);
     Route::post('/logout', [AuthController::class, 'logout']); // Logout
+    Route::post('/refresh', function () {
+        return response()->json([
+            'success' => true,
+            'token' => auth('api')->refresh(),
+        ]);
+    }); // Refresh JWT Token
+
 
     // User hobbies
     Route::get('/my-hobbies', [HobbyController::class, 'myHobbies']);
@@ -56,6 +63,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // User Profile (Public/Protected view)
     Route::get('/users/{id}/profile', [PostController::class, 'userProfile']); // View user profile with posts
 
+    // Notifications
+    Route::post('/notifications/update-token', [\App\Http\Controllers\Api\NotificationController::class, 'updateToken']);
+    Route::post('/notifications/send-test', [\App\Http\Controllers\Api\NotificationController::class, 'sendTest']);
+    
     // ========== Packages & Wallet Routes ==========
     
     // Packages
@@ -83,7 +94,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 // Admin routes (require authentication)
-Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
+Route::middleware('auth:api')->prefix('admin')->group(function () {
     Route::post('/hobbies', [HobbyController::class, 'store']); // Create hobby
     Route::post('/hobbies/{id}', [HobbyController::class, 'update']); // Update hobby (POST for file upload)
     Route::delete('/hobbies/{id}', [HobbyController::class, 'destroy']); // Delete hobby

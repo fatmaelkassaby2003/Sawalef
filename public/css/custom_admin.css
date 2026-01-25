@@ -1,0 +1,68 @@
+/* تخصيص السايد بار بالكامل بالموف الداكن */
+:root {
+    --purple-dark: #1e1b4b;
+    /* موف داكن جداً */
+    --purple-medium: #312e81;
+    /* موف متوسط */
+    --purple-selection: rgba(168, 85, 247, 0.25);
+    /* موف خفيف شفاف */
+}
+
+/* خلفية القائمة الجانبية بالكامل */
+.fi-sidebar {
+    background-color: var(--purple-dark) !important;
+}
+
+/* الجزء العلوي الذي يحتوي على اللوجو */
+.fi-sidebar-header,
+.fi-sidebar-header>div {
+    background-color: var(--purple-dark) !important;
+    border-bottom: none !important;
+}
+
+/* القائمة نفسها */
+.fi-sidebar-nav {
+    background-color: var(--purple-dark) !important;
+}
+
+/* إجبار لون العنصر المختار (Selection) */
+.fi-sidebar-item-active,
+.fi-sidebar-item-active a,
+.fi-sidebar-item-active button,
+[aria-current="page"] {
+    background-color: var(--purple-selection) !important;
+    border-radius: 0.75rem !important;
+    /* حواف أكثر نعومة */
+}
+
+/* لون النص والأيقونة للعنصر المختار */
+.fi-sidebar-item-active span,
+.fi-sidebar-item-active svg,
+[aria-current="page"] span,
+[aria-current="page"] svg {
+    color: #e879f9 !important;
+    /* موف فاتح مشرق جداً */
+    font-weight: 800 !important;
+}
+
+/* التفاعل عند تمرير الماوس */
+.fi-sidebar-item:hover a,
+.fi-sidebar-item:hover button {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* النصوص والأيقونات للعناصر غير المختارة */
+.fi-sidebar span,
+.fi-sidebar svg {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* إخفاء أي خطوط فاصلة بيضاء */
+.fi-sidebar::after {
+    display: none !important;
+}
+
+/* لضمان عدم وجود أي خلفية بيضاء من النظام */
+aside [class*="active"] {
+    background-color: var(--purple-selection) !important;
+}

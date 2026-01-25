@@ -28,7 +28,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->colors([
-                'primary' => Color::Blue,
+                'primary' => Color::Purple,
                 'gray' => Color::Slate,
             ])
             ->font('Cairo')
@@ -36,8 +36,8 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogoHeight('3rem')
             ->favicon(asset('favicon.ico'))
             ->renderHook(
-                 'panels::head.end',
-                 fn (): string => '<link rel="stylesheet" href="' . asset('css/admin_v2.css') . '" />'
+                'panels::head.end',
+                fn (): string => '<link rel="stylesheet" href="' . asset('css/custom_admin.css') . '" />'
             )
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')

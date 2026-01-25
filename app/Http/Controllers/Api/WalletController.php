@@ -371,6 +371,21 @@ class WalletController extends Controller
 
             DB::commit();
 
+            // Check for low balance notification
+            if ($newBalance < 20) {
+                try {
+                    $fcmService = app(\App\Services\FCMService::class);
+                    $fcmService->sendToUser(
+                        $user->id,
+                        'تنبيه: رصيد منخفض ⚠️',
+                        "رصيدك الحالي هو {$newBalance} جنيه فقط. اشحن محفظتك الآن لتستمر في الاستمتاع بمميزات سوالف!",
+                        ['type' => 'low_balance', 'current_balance' => $newBalance]
+                    );
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('FCM Low Balance Error: ' . $e->getMessage());
+                }
+            }
+
             return response()->json([
                 'status' => true,
                 'message' => 'تم شراء الباقة بنجاح! 🎉',

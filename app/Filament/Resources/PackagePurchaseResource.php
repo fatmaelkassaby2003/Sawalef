@@ -22,7 +22,7 @@ class PackagePurchaseResource extends Resource
 
     protected static ?string $pluralModelLabel = 'مشتريات الباقات';
 
-    protected static ?int $navigationSort = 6;
+    protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
     {
@@ -133,7 +133,9 @@ class PackagePurchaseResource extends Resource
             ])
             ->bulkActions([
                 // No delete
-            ]);
+            ])
+            ->paginated([10, 25, 50, 100, 'all'])
+            ->defaultPaginationPageOption(10);
     }
 
     public static function getRelations(): array

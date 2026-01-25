@@ -165,7 +165,7 @@ class ChatController extends Controller
     /**
      * Send a message (text or image)
      */
-    public function sendMessage(Request $request, $conversationId)
+    public function sendMessage(Request $request, $conversationId, \App\Services\FCMService $fcmService)
     {
         // Validate based on what's being sent
         $rules = [];
@@ -234,6 +234,21 @@ class ChatController extends Controller
 
             // Broadcast the message via Pusher
             broadcast(new MessageSent($message))->toOthers();
+
+            // SEND NOTIFICATION
+            try {
+                $otherUserId = ($conversation->user_one_id == $user->id) ? $conversation->user_two_id : $conversation->user_one_id;
+                $notifBody = $messageType == 'image' ? '📷 صورة جديدة' : $messageContent;
+                
+                $fcmService->sendToUser(
+                    $otherUserId,
+                    'رسالة جديدة من ' . $user->name,
+                    $notifBody,
+                    ['type' => 'chat_message', 'conversation_id' => $conversationId]
+                );
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('FCM Error in Chat: ' . $e->getMessage());
+            }
 
             return response()->json([
                 'status' => true,

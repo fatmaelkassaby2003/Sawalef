@@ -209,6 +209,87 @@
             "description": "Chat endpoints for real-time messaging"
         },
         {
+            "name": "Notifications",
+            "item": [
+                {
+                    "name": "Update FCM Token",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"fcm_token\": \"YOUR_FCM_TOKEN_HERE\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/notifications/update-token",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "notifications",
+                                "update-token"
+                            ]
+                        },
+                        "description": "Update current user's FCM token for push notifications"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Send Test Notification",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"title\": \"تجربة إشعار 🔔\",\n    \"body\": \"هذا إشعار تجريبي من نظام سوالف\",\n    \"user_id\": null\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/notifications/send-test",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "notifications",
+                                "send-test"
+                            ]
+                        },
+                        "description": "Send a test push notification to current user (or specified user_id)"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
             "name": "Auth",
             "item": [
                 {

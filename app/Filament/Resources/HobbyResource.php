@@ -23,7 +23,7 @@ class HobbyResource extends Resource
     protected static ?string $pluralModelLabel = 'الهوايات';
     protected static ?string $navigationGroup = 'إدارة المحتوى';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 6;
 
     public static function form(Form $form): Form
     {

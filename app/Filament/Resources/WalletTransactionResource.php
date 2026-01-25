@@ -22,7 +22,7 @@ class WalletTransactionResource extends Resource
 
     protected static ?string $pluralModelLabel = 'معاملات المحفظة';
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {
@@ -177,7 +177,9 @@ class WalletTransactionResource extends Resource
             ])
             ->bulkActions([
                 // No bulk delete for transactions
-            ]);
+            ])
+            ->paginated([10, 25, 50, 100, 'all'])
+            ->defaultPaginationPageOption(10);
     }
 
     public static function getRelations(): array

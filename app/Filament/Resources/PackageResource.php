@@ -25,7 +25,7 @@ class PackageResource extends Resource
 
     protected static ?string $pluralModelLabel = 'الباقات';
 
-    protected static ?int $navigationSort = 4;
+    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {

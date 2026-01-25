@@ -29,5 +29,12 @@ class AppServiceProvider extends ServiceProvider
                 );
             });
         }
+
+        // Global Table Configuration
+        \Filament\Tables\Table::configureUsing(function (\Filament\Tables\Table $table): void {
+            $table
+                ->paginated([10, 25, 50, 100])
+                ->defaultPaginationPageOption(10);
+        });
     }
 }

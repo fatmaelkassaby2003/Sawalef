@@ -39,7 +39,7 @@ class AuthController extends Controller
         }
 
         $user = User::create($request->only(['name', 'phone', 'nickname', 'age', 'country_ar', 'country_en', 'gender']));
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $token = auth('api')->login($user);
 
         return $this->successResponse('Account created successfully', $user, $token, 201);
     }
@@ -105,7 +105,7 @@ class AuthController extends Controller
             return $this->errorResponse('Invalid or expired OTP code.', 401);
         }
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $token = auth('api')->login($user);
 
         return $this->successResponse('Login successful', $user, $token);
     }
@@ -164,11 +164,11 @@ class AuthController extends Controller
     }
 
     /**
-     * Logout user (revoke token)
+     * Logout user (invalidate token)
      */
     public function logout(Request $request): JsonResponse
     {
-        $request->user()->currentAccessToken()->delete();
+        auth('api')->logout();
 
         return response()->json([
             'success' => true,
