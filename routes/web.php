@@ -14,3 +14,11 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::redirect('/', '/admin');
+
+// Test Payment Page (for development/testing)
+Route::get('/payment/test', function () {
+    $transactionId = request('transaction_id');
+    $amount = request('amount');
+    
+    return view('payment.test', compact('transactionId', 'amount'));
+})->name('payment.test');

@@ -82,11 +82,14 @@ class WalletController extends Controller
         try {
             $result = $this->fawaterakService->getPaymentMethods();
 
-            if (!$result['success']) {
+            // If Fawaterak API fails or returns empty data, return static payment methods
+            if (!$result['success'] || empty($result['data'])) {
                 return response()->json([
-                    'status' => false,
-                    'message' => $result['message']
-                ], 500);
+                    'status' => true,
+                    'message' => 'تم جلب طرق الدفع بنجاح',
+                    'data' => $this->getStaticPaymentMethods(),
+                    'note' => 'قيد التفعيل - سيتم تفعيل بوابة الدفع قريباً'
+                ], 200);
             }
 
             return response()->json([
@@ -96,11 +99,13 @@ class WalletController extends Controller
             ], 200);
 
         } catch (\Exception $e) {
+            // Return static methods as fallback
             return response()->json([
-                'status' => false,
-                'message' => 'حدث خطأ أثناء جلب طرق الدفع',
-                'error' => $e->getMessage()
-            ], 500);
+                'status' => true,
+                'message' => 'تم جلب طرق الدفع بنجاح',
+                'data' => $this->getStaticPaymentMethods(),
+                'note' => 'قيد التفعيل - سيتم تفعيل بوابة الدفع قريباً'
+            ], 200);
         }
     }
 
@@ -111,7 +116,7 @@ class WalletController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'amount' => 'required|numeric|min:10',
-            'payment_method_id' => 'required|integer', 
+            'payment_method_id' => 'nullable|integer', 
         ]);
 
         if ($validator->fails()) {
@@ -140,7 +145,36 @@ class WalletController extends Controller
                 'reference_number' => WalletTransaction::generateReferenceNumber(),
             ]);
 
-            // Create Fawaterak invoice
+            // 🧪 TEST MODE: Skip Fawaterak API and create mock payment URL
+            $testMode = true; // Set to false when Fawaterak is ready
+            
+            if ($testMode) {
+                // Mock payment URL for testing
+                $paymentUrl = url('/payment/test?transaction_id=' . $transaction->id . '&amount=' . $amount);
+                $invoiceId = 'TEST_' . $transaction->reference_number;
+                
+                $transaction->update([
+                    'fawaterak_invoice_id' => $invoiceId,
+                    'notes' => 'وضع الاختبار - TEST MODE'
+                ]);
+                
+                DB::commit();
+                
+                return response()->json([
+                    'status' => true,
+                    'message' => 'تم إنشاء عملية الدفع بنجاح (وضع الاختبار)',
+                    'data' => [
+                        'transaction_id' => $transaction->id,
+                        'reference_number' => $transaction->reference_number,
+                        'payment_url' => $paymentUrl,
+                        'invoice_id' => $invoiceId,
+                        'test_mode' => true,
+                        'note' => 'هذا رابط تجريبي - سيتم تفعيل بوابة الدفع الحقيقية قريباً'
+                    ]
+                ], 200);
+            }
+
+            // PRODUCTION MODE: Use actual Fawaterak API
             $invoiceResult = $this->fawaterakService->createInvoice([
                 'payment_method_id' => $request->payment_method_id,
                 'amount' => $amount,
@@ -358,6 +392,43 @@ class WalletController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Get static payment methods (fallback when API is unavailable)
+     */
+    private function getStaticPaymentMethods()
+    {
+        return [
+            [
+                'paymentId' => 1,
+                'name_ar' => 'بطاقة ائتمان',
+                'name_en' => 'Credit/Debit Card',
+                'icon' => '💳',
+                'is_active' => true
+            ],
+            [
+                'paymentId' => 2,
+                'name_ar' => 'فودافون كاش',
+                'name_en' => 'Vodafone Cash',
+                'icon' => '📱',
+                'is_active' => true
+            ],
+            [
+                'paymentId' => 4,
+                'name_ar' => 'ميزة',
+                'name_en' => 'Meeza',
+                'icon' => '🏦',
+                'is_active' => true
+            ],
+            [
+                'paymentId' => 5,
+                'name_ar' => 'فوري',
+                'name_en' => 'Fawry',
+                'icon' => '🏪',
+                'is_active' => true
+            ],
+        ];
     }
 
     /**

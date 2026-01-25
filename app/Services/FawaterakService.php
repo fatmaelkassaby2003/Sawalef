@@ -29,32 +29,38 @@ class FawaterakService
     public function createInvoice(array $data)
     {
         try {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->apiKey,
-                'Content-Type' => 'application/json',
-            ])->post($this->baseUrl . '/invoiceInitPay', [
-                'payment_method_id' => $data['payment_method_id'] ?? 1, // Default: Card
+            // Prepare payload
+            $payload = [
                 'cartTotal' => $data['amount'],
                 'currency' => 'EGP',
                 'customer' => [
-                    'first_name' => $data['customer_name'],
-                    'last_name' => '',
+                    'first_name' => explode(' ', $data['customer_name'])[0],
+                    'last_name' => explode(' ', $data['customer_name'])[1] ?? 'User',
                     'email' => $data['customer_email'],
                     'phone' => $data['customer_phone'],
-                    'address' => ''
+                    'address' => 'Cairo, Egypt' // Required by some gateways
                 ],
                 'redirectionUrls' => [
-                    'successUrl' => config('fawaterak.success_url'),
-                    'failUrl' => config('fawaterak.failure_url'),
-                    'pendingUrl' => config('fawaterak.failure_url')
+                    'successUrl' => config('fawaterak.success_url', url('/payment/success')),
+                    'failUrl' => config('fawaterak.failure_url', url('/payment/failed')),
+                    'pendingUrl' => config('fawaterak.success_url', url('/payment/success'))
                 ],
                 'cartItems' => [[
                     'name' => $data['item_name'],
                     'price' => $data['amount'],
-                    'quantity' => 1
-                ]],
-                'vendorId' => $data['vendor_id'] ?? null,
-            ]);
+                    'quantity' => '1'
+                ]]
+            ];
+
+            // Add payment method ONLY if provided
+            if (isset($data['payment_method_id'])) {
+                $payload['payment_method_id'] = $data['payment_method_id'];
+            }
+
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Content-Type' => 'application/json',
+            ])->post($this->baseUrl . '/invoiceInitPay', $payload);
 
             if ($response->successful()) {
                 $result = $response->json();
