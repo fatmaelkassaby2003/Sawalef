@@ -7,7 +7,8 @@ use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\PackageController;
 use App\Http\Controllers\Api\WalletController;
 use App\Http\Controllers\Api\FawaterakWebhookController;
-use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,6 +20,73 @@ use Illuminate\Support\Facades\Broadcast;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+
+// -----------------------------------------------------------------------------
+// BROADCASTING AUTHENTICATION (Manual & Explicit) - RESTORED ✅
+// -----------------------------------------------------------------------------
+Route::match(['get', 'post', 'head'], '/broadcasting/auth', function (Request $request) {
+    
+    // 1. GET/HEAD: Health Check
+    if ($request->isMethod('get') || $request->isMethod('head')) {
+        $config = config('broadcasting.connections.pusher');
+        $displaySecret = substr($config['secret'] ?? 'unknown', 0, 5) . '******'; 
+
+        $status = [
+            'status' => 'ready',
+            'message' => 'Pusher Auth Endpoint is Active (Manual Route) ✅',
+            'methods_allowed' => ['GET', 'POST', 'HEAD'],
+            'pusher_config' => [
+                'app_id' => $config['app_id'] ?? 'null',
+                'key' => $config['key'] ?? 'null',
+                'secret' => $displaySecret,
+                'cluster' => $config['options']['cluster'] ?? 'mt1',
+            ],
+            'server_time' => now()->toDateTimeString(),
+        ];
+        return response()->json($status);
+    }
+
+    // 2. POST: Real Authentication
+    $user = $request->user();
+    
+    if (!$user) {
+        return response()->json(['message' => 'Unauthorized'], 403);
+    }
+
+    \Illuminate\Support\Facades\Log::info('Pusher Auth Request', [
+        'user_id' => $user->id,
+        'socket_id' => $request->socket_id,
+        'channel_name' => $request->channel_name
+    ]);
+
+    if (!$request->socket_id || !$request->channel_name) {
+        return response()->json(['message' => 'Missing socket_id or channel_name'], 400);
+    }
+
+    try {
+        $pusher = new \Pusher\Pusher(
+            config('broadcasting.connections.pusher.key'),
+            config('broadcasting.connections.pusher.secret'),
+            config('broadcasting.connections.pusher.app_id'),
+            ['cluster' => config('broadcasting.connections.pusher.options.cluster'), 'useTLS' => true]
+        );
+
+        $auth = $pusher->authorizeChannel($request->channel_name, $request->socket_id, json_encode([
+            'user_id' => (string) $user->id,
+            'user_info' => [
+                'name' => $user->name,
+                'avatar' => $user->profile_image ? url('storage/' . $user->profile_image) : null,
+            ]
+        ]));
+        
+        return response($auth);
+        
+    } catch (\Exception $e) {
+        \Illuminate\Support\Facades\Log::error('Pusher Auth Failed: ' . $e->getMessage());
+        return response()->json(['message' => 'Auth Error'], 403);
+    }
+})->middleware('auth:api');
+
 
 // Public authentication routes
 Route::post('/register', [AuthController::class, 'register']); // Register new account
@@ -91,46 +159,6 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/conversations/{conversationId}/messages', [\App\Http\Controllers\Api\ChatController::class, 'getMessages']); // Get messages
         Route::post('/conversations/{conversationId}/messages', [\App\Http\Controllers\Api\ChatController::class, 'sendMessage']); // Send message (text or image)
     });
-
-    // Manual Broadcasting Auth Route (Final Fix with Logging)
-    Route::post('/broadcasting/auth', function (Illuminate\Http\Request $request) {
-        \Illuminate\Support\Facades\Log::info('=== PUSHER AUTH REQUEST START ===');
-        \Illuminate\Support\Facades\Log::info('Headers: ', $request->headers->all());
-        \Illuminate\Support\Facades\Log::info('Input: ', $request->all());
-        
-        $user = auth('api')->user();
-        
-        if (!$user) {
-            \Illuminate\Support\Facades\Log::error('Pusher Auth Failed: User not authenticated via JWT');
-            return response()->json(['message' => 'Unauthenticated'], 401);
-        }
-
-        \Illuminate\Support\Facades\Log::info('Pusher Auth Success for User ID: ' . $user->id);
-        
-        try {
-            // Manual Pusher Signature Generation to bypass config issues
-            $pusher = new \Pusher\Pusher(
-                config('broadcasting.connections.pusher.key'),
-                config('broadcasting.connections.pusher.secret'),
-                config('broadcasting.connections.pusher.app_id'),
-                config('broadcasting.connections.pusher.options')
-            );
-            
-            $socketId = $request->input('socket_id');
-            $channelName = $request->input('channel_name');
-            
-            // Generate the auth string manually
-            $auth = $pusher->authorizeChannel($channelName, $socketId);
-            
-            \Illuminate\Support\Facades\Log::info('Pusher Manual Auth Success');
-            
-            return response()->json(json_decode($auth, true));
-            
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('BROADCAST MANUAL FAILURE: ' . $e->getMessage());
-            return response()->json(['error' => 'Broadcasting authentication failed'], 500);
-        }
-    });
 });
 
 
@@ -148,4 +176,3 @@ Route::prefix('fawaterak')->group(function () {
     Route::post('/callback', [FawaterakWebhookController::class, 'callback']); // Payment callback (POST)
     Route::get('/test-callback', [FawaterakWebhookController::class, 'testCallback']); // Test payment callback
 });
-

@@ -233,7 +233,13 @@ class ChatController extends Controller
             $message->load('sender');
 
             // Broadcast the message via Pusher
-            broadcast(new MessageSent($message))->toOthers();
+            \Illuminate\Support\Facades\Log::info('Broadcasting MessageSent event now...', ['message_id' => $message->id]);
+            try {
+                broadcast(new MessageSent($message))->toOthers();
+                \Illuminate\Support\Facades\Log::info('Broadcast executed successfully.');
+            } catch (\Exception $broadcastError) {
+                \Illuminate\Support\Facades\Log::error('BROADCASTING FAILED: ' . $broadcastError->getMessage());
+            }
 
             // SEND NOTIFICATION
             try {

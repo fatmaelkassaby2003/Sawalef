@@ -12,7 +12,7 @@ class BroadcastServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Broadcast::routes(['prefix' => 'api', 'middleware' => ['api', 'auth:api']]);
+        // Broadcast::routes(['prefix' => 'api', 'middleware' => ['auth:api']]); // Disabled to use manual route in api.php
 
         require base_path('routes/channels.php');
     }
