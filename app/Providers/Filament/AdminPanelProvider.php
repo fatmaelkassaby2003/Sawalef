@@ -35,6 +35,8 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogo(fn () => view('filament.brand'))
             ->brandLogoHeight('3rem')
             ->favicon(asset('favicon.ico'))
+            ->spa(false) // إيقاف الـ SPA لحل مشكلة الـ Pagination
+            ->databaseNotifications() // تفعيل التنبيهات لضمان عمل Livewire بشكل صحيح
             ->renderHook(
                 'panels::head.end',
                 fn (): string => '<link rel="stylesheet" href="' . asset('css/custom_admin.css') . '" />'

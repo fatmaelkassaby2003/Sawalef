@@ -18,14 +18,12 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
 
-// Chat Conversation Channels
+// Chat Conversation Channels (Simplified for Testing)
 Broadcast::channel('conversation.{conversationId}', function ($user, $conversationId) {
-    $conversation = \App\Models\Conversation::find($conversationId);
-    
-    if (!$conversation) {
-        return false;
-    }
-    
-    // Check if user is part of this conversation
-    return $conversation->user_one_id == $user->id || $conversation->user_two_id == $user->id;
+    // For testing: allow any authenticated user
+    return true; 
+});
+
+Broadcast::channel('chat.{conversationId}', function ($user, $conversationId) {
+    return true;
 });

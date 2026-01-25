@@ -36,5 +36,8 @@ class AppServiceProvider extends ServiceProvider
                 ->paginated([10, 25, 50, 100])
                 ->defaultPaginationPageOption(10);
         });
+
+        // Force Pagination Theme to Bootstrap for stability
+        \Illuminate\Pagination\Paginator::useBootstrap();
     }
 }

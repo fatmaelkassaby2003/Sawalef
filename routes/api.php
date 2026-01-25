@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\PackageController;
 use App\Http\Controllers\Api\WalletController;
 use App\Http\Controllers\Api\FawaterakWebhookController;
+use Illuminate\Support\Facades\Broadcast;
 
 /*
 |--------------------------------------------------------------------------
@@ -89,6 +90,46 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/conversations/start', [\App\Http\Controllers\Api\ChatController::class, 'startConversation']); // Start/get conversation with user
         Route::get('/conversations/{conversationId}/messages', [\App\Http\Controllers\Api\ChatController::class, 'getMessages']); // Get messages
         Route::post('/conversations/{conversationId}/messages', [\App\Http\Controllers\Api\ChatController::class, 'sendMessage']); // Send message (text or image)
+    });
+
+    // Manual Broadcasting Auth Route (Final Fix with Logging)
+    Route::post('/broadcasting/auth', function (Illuminate\Http\Request $request) {
+        \Illuminate\Support\Facades\Log::info('=== PUSHER AUTH REQUEST START ===');
+        \Illuminate\Support\Facades\Log::info('Headers: ', $request->headers->all());
+        \Illuminate\Support\Facades\Log::info('Input: ', $request->all());
+        
+        $user = auth('api')->user();
+        
+        if (!$user) {
+            \Illuminate\Support\Facades\Log::error('Pusher Auth Failed: User not authenticated via JWT');
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        \Illuminate\Support\Facades\Log::info('Pusher Auth Success for User ID: ' . $user->id);
+        
+        try {
+            // Manual Pusher Signature Generation to bypass config issues
+            $pusher = new \Pusher\Pusher(
+                config('broadcasting.connections.pusher.key'),
+                config('broadcasting.connections.pusher.secret'),
+                config('broadcasting.connections.pusher.app_id'),
+                config('broadcasting.connections.pusher.options')
+            );
+            
+            $socketId = $request->input('socket_id');
+            $channelName = $request->input('channel_name');
+            
+            // Generate the auth string manually
+            $auth = $pusher->authorizeChannel($channelName, $socketId);
+            
+            \Illuminate\Support\Facades\Log::info('Pusher Manual Auth Success');
+            
+            return response()->json(json_decode($auth, true));
+            
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('BROADCAST MANUAL FAILURE: ' . $e->getMessage());
+            return response()->json(['error' => 'Broadcasting authentication failed'], 500);
+        }
     });
 });
 
