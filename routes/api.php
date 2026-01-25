@@ -77,7 +77,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/conversations', [\App\Http\Controllers\Api\ChatController::class, 'getConversations']); // Get all conversations
         Route::post('/conversations/start', [\App\Http\Controllers\Api\ChatController::class, 'startConversation']); // Start/get conversation with user
         Route::get('/conversations/{conversationId}/messages', [\App\Http\Controllers\Api\ChatController::class, 'getMessages']); // Get messages
-        Route::post('/conversations/{conversationId}/messages', [\App\Http\Controllers\Api\ChatController::class, 'sendMessage']); // Send message
+        Route::post('/conversations/{conversationId}/messages', [\App\Http\Controllers\Api\ChatController::class, 'sendMessage']); // Send message (text or image)
     });
 });
 

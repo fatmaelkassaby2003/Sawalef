@@ -115,7 +115,7 @@
                     "response": []
                 },
                 {
-                    "name": "4. Send Message",
+                    "name": "4. Send Text Message",
                     "request": {
                         "method": "POST",
                         "header": [
@@ -132,7 +132,7 @@
                         ],
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"message\": \"مرحباً! كيف حالك؟ 👋\",\n    \"type\": \"text\"\n}",
+                            "raw": "{\n    \"message\": \"مرحباً! كيف حالك؟ 👋\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -152,7 +152,56 @@
                                 "messages"
                             ]
                         },
-                        "description": "Send a new message (will broadcast via Pusher)"
+                        "description": "Send a text message (JSON)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "5. Send Image Message",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "image",
+                                    "type": "file",
+                                    "src": []
+                                },
+                                {
+                                    "key": "message",
+                                    "value": "شوف الصورة دي! 😍",
+                                    "type": "text",
+                                    "description": "Optional caption"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/chat/conversations/1/messages",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "chat",
+                                "conversations",
+                                "1",
+                                "messages"
+                            ]
+                        },
+                        "description": "Send an image message (form-data). Choose a file for the 'image' field."
                     },
                     "response": []
                 }

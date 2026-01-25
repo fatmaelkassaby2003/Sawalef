@@ -132,6 +132,7 @@ class ChatController extends Controller
                         'id' => $message->id,
                         'sender_id' => $message->sender_id,
                         'message' => $message->message,
+                        'caption' => $message->caption,
                         'type' => $message->type,
                         'is_read' => $message->is_read,
                         'created_at' => $message->created_at->toISOString(),
@@ -162,14 +163,21 @@ class ChatController extends Controller
     }
 
     /**
-     * Send a message
+     * Send a message (text or image)
      */
     public function sendMessage(Request $request, $conversationId)
     {
-        $validator = Validator::make($request->all(), [
-            'message' => 'required|string|max:1000',
-            'type' => 'nullable|in:text,image,file',
-        ]);
+        // Validate based on what's being sent
+        $rules = [];
+        
+        if ($request->hasFile('image')) {
+            $rules['image'] = 'required|image|mimes:jpeg,png,jpg,gif|max:5120'; // Max 5MB
+            $rules['message'] = 'nullable|string|max:500'; // Optional caption
+        } else {
+            $rules['message'] = 'required|string|max:1000';
+        }
+        
+        $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
             return response()->json([
@@ -192,11 +200,30 @@ class ChatController extends Controller
                 ], 403);
             }
 
+            $messageContent = '';
+            $caption = null;
+            $messageType = 'text';
+
+            // Handle image upload if present
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $imageName = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
+                $image->move(public_path('chat/images'), $imageName);
+                $imageUrl = url('chat/images/' . $imageName);
+                
+                $messageContent = $imageUrl; // Image URL
+                $caption = $request->message; // Caption for image
+                $messageType = 'image';
+            } else {
+                $messageContent = $request->message; // Text message
+            }
+
             $message = Message::create([
                 'conversation_id' => $conversationId,
                 'sender_id' => $user->id,
-                'message' => $request->message,
-                'type' => $request->type ?? 'text',
+                'message' => $messageContent,
+                'caption' => $caption,
+                'type' => $messageType,
             ]);
 
             // Update conversation timestamp
@@ -210,11 +237,12 @@ class ChatController extends Controller
 
             return response()->json([
                 'status' => true,
-                'message' => 'تم إرسال الرسالة بنجاح',
+                'message' => $messageType == 'image' ? 'تم إرسال الصورة بنجاح' : 'تم إرسال الرسالة بنجاح',
                 'data' => [
                     'id' => $message->id,
                     'sender_id' => $message->sender_id,
                     'message' => $message->message,
+                    'caption' => $message->caption,
                     'type' => $message->type,
                     'created_at' => $message->created_at->toISOString(),
                 ]

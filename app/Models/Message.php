@@ -13,6 +13,7 @@ class Message extends Model
         'conversation_id',
         'sender_id',
         'message',
+        'caption',
         'type',
         'is_read',
         'read_at',
