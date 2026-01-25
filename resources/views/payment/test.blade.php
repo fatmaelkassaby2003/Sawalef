@@ -176,10 +176,11 @@
             const transactionId = '{{ $transactionId }}';
             const amount = '{{ $amount }}';
             
-            // Redirect to API callback to update balance
-            // Using Laravel's url() helper to ensure correct path
+            // Redirect to WEB callback to update balance
+            // Using the route() helper if possible, or relative path
+            // We added /payment/test-callback in web.php
             const baseUrl = "{{ url('/') }}";
-            window.location.href = `${baseUrl}/api/fawaterak/test-callback?transaction_id=${transactionId}&status=paid`;
+            window.location.href = `${baseUrl}/payment/test-callback?transaction_id=${transactionId}&status=paid`;
         }
         
         function simulateFail() {

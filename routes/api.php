@@ -71,6 +71,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/withdrawal', [WalletController::class, 'initiateWithdrawal']); // Withdraw from wallet
         Route::post('/purchase-package', [WalletController::class, 'purchasePackage']); // Purchase package with wallet balance
     });
+
+    // ========== Chat Routes (Real-time with Pusher) ==========
+    Route::prefix('chat')->group(function () {
+        Route::get('/conversations', [\App\Http\Controllers\Api\ChatController::class, 'getConversations']); // Get all conversations
+        Route::post('/conversations/start', [\App\Http\Controllers\Api\ChatController::class, 'startConversation']); // Start/get conversation with user
+        Route::get('/conversations/{conversationId}/messages', [\App\Http\Controllers\Api\ChatController::class, 'getMessages']); // Get messages
+        Route::post('/conversations/{conversationId}/messages', [\App\Http\Controllers\Api\ChatController::class, 'sendMessage']); // Send message
+    });
 });
 
 

@@ -22,3 +22,15 @@ Route::get('/payment/test', function () {
     
     return view('payment.test', compact('transactionId', 'amount'));
 })->name('payment.test');
+
+// Test Callback Route (Web fallback)
+Route::get('/payment/test-callback', [\App\Http\Controllers\Api\FawaterakWebhookController::class, 'testCallback'])->name('payment.test-callback');
+
+// Fix for Controller Redirects (Redirect /payment/success to /payment/success.php)
+Route::get('/payment/success', function () {
+    return redirect('/payment/success.php?' . http_build_query(request()->all()));
+});
+
+Route::get('/payment/failed', function () {
+    return redirect('/payment/failed.php?' . http_build_query(request()->all()));
+});
