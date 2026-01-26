@@ -166,6 +166,14 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/list', [\App\Http\Controllers\Api\FriendshipController::class, 'getFriends']); // Get list of friends
     });
 
+    // ========== Agora Call Routes ==========
+    Route::prefix('calls')->group(function () {
+        Route::post('/start', [\App\Http\Controllers\Api\CallController::class, 'startCall']); // Initiate call
+        Route::post('/accept', [\App\Http\Controllers\Api\CallController::class, 'acceptCall']); // Accept call (get token)
+        Route::post('/end', [\App\Http\Controllers\Api\CallController::class, 'endCall']); // End/Decline call
+        Route::get('/history', [\App\Http\Controllers\Api\CallController::class, 'getHistory']); // Get call logs
+    });
+
     // ========== Chat Routes (Real-time with Pusher) ==========
     Route::prefix('chat')->group(function () {
         Route::get('/conversations', [\App\Http\Controllers\Api\ChatController::class, 'getConversations']); // Get all conversations

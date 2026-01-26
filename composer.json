@@ -9,6 +9,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.1",
+        "cyberdeep/laravel-agora-token-generator": "^1.0",
         "filament/filament": "^3.3.46",
         "google/apiclient": "^2.19",
         "guzzlehttp/guzzle": "^7.2",
@@ -70,6 +71,6 @@
             "php-http/discovery": true
         }
     },
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "prefer-stable": true
 }
