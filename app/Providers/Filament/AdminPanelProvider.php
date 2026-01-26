@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Navigation\NavigationGroup;
 use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -28,28 +29,45 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->colors([
-                'primary' => Color::Purple,
+                'primary' => Color::Blue,
                 'gray' => Color::Slate,
             ])
             ->font('Cairo')
             ->brandLogo(fn () => view('filament.brand'))
             ->brandLogoHeight('3rem')
             ->favicon(asset('favicon.ico'))
-            ->spa(false) // الحل النهائي لمشكلة Unsaved changes
+            ->spa(false) 
+            ->unsavedChangesAlerts()
             ->databaseNotifications()
+            // --- Custom CSS Hooks ---
+            ->renderHook(
+                'panels::head.end',
+                fn (): string => '<link rel="stylesheet" href="' . asset('css/filament-sidebar.css') . '" />'
+            )
+            ->renderHook(
+                'panels::head.end',
+                fn (): string => '<link rel="stylesheet" href="' . asset('css/filament-sidebar-dark.css') . '" />'
+            )
             ->renderHook(
                 'panels::head.end',
                 fn (): string => '<link rel="stylesheet" href="' . asset('css/custom_admin.css') . '" />'
             )
+            ->navigationGroups([
+                NavigationGroup::make()->label('الدعم')->icon('heroicon-o-chat-bubble-left-right')->collapsed(true),
+                NavigationGroup::make()->label('العمليات')->icon('heroicon-o-briefcase')->collapsed(true),
+                NavigationGroup::make()->label('الإدارة')->icon('heroicon-o-user-group')->collapsed(true),
+                NavigationGroup::make()->label('المالية')->icon('heroicon-o-banknotes')->collapsed(true),
+            ])
+            ->collapsibleNavigationGroups(true)
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
                 Pages\Dashboard::class,
             ])
             ->widgets([
-                \App\Filament\Widgets\StatsOverview::class,       // Top Row
-                \App\Filament\Widgets\ProjectInfoWidget::class,   // Right (RTL First)
-                \App\Filament\Widgets\CustomAccountWidget::class, // Left (RTL Second)
+                \App\Filament\Widgets\StatsOverview::class,
+                \App\Filament\Widgets\ProjectInfoWidget::class,
+                \App\Filament\Widgets\CustomAccountWidget::class,
                 \App\Filament\Widgets\RecentUsersWidget::class,
             ])
             ->middleware([
