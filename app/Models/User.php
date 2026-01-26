@@ -94,6 +94,33 @@ class User extends Authenticatable implements FilamentUser, JWTSubject
         return $this->hasMany(SiteNotification::class);
     }
 
+    public function friendRequestsSent()
+    {
+        return $this->hasMany(FriendRequest::class, 'sender_id');
+    }
+
+    public function friendRequestsReceived()
+    {
+        return $this->hasMany(FriendRequest::class, 'receiver_id');
+    }
+
+    /**
+     * Check if the user is friends with another user.
+     */
+    public function isFriendWith($userId)
+    {
+        return FriendRequest::where('status', 'accepted')
+            ->where(function ($query) use ($userId) {
+                $query->where(function ($q) use ($userId) {
+                    $q->where('sender_id', $this->id)
+                      ->where('receiver_id', $userId);
+                })->orWhere(function ($q) use ($userId) {
+                    $q->where('sender_id', $userId)
+                      ->where('receiver_id', $this->id);
+                });
+            })->exists();
+    }
+
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.
      *

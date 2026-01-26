@@ -86,6 +86,14 @@ class ChatController extends Controller
                 ], 400);
             }
 
+            // CHECK IF FRIENDS
+            if (!$currentUser->isFriendWith($otherUserId)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'لا يمكنك بدء محادثة إلا مع الأصدقاء فقط'
+                ], 403);
+            }
+
             $conversation = Conversation::findOrCreateBetween($currentUser->id, $otherUserId);
 
             return response()->json([
@@ -197,6 +205,15 @@ class ChatController extends Controller
                 return response()->json([
                     'status' => false,
                     'message' => 'غير مصرح لك بإرسال رسائل في هذه المحادثة'
+                ], 403);
+            }
+
+            // CHECK IF STILL FRIENDS
+            $otherUserId = ($conversation->user_one_id == $user->id) ? $conversation->user_two_id : $conversation->user_one_id;
+            if (!$user->isFriendWith($otherUserId)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'يمكنك إرسال الرسائل للأصدقاء فقط'
                 ], 403);
             }
 

@@ -135,6 +135,11 @@ Route::middleware('auth:api')->group(function () {
     // Notifications
     Route::post('/notifications/update-token', [\App\Http\Controllers\Api\NotificationController::class, 'updateToken']);
     Route::post('/notifications/send-test', [\App\Http\Controllers\Api\NotificationController::class, 'sendTest']);
+    Route::get('/notifications', [\App\Http\Controllers\Api\NotificationController::class, 'index']); // Get All
+    Route::get('/notifications/latest', [\App\Http\Controllers\Api\NotificationController::class, 'latest']); // Get Latest 5
+    Route::get('/notifications/unread-count', [\App\Http\Controllers\Api\NotificationController::class, 'unreadCount']); // Get Unread Count
+    Route::post('/notifications/mark-as-read', [\App\Http\Controllers\Api\NotificationController::class, 'markAsRead']); // Mark specific as read
+    Route::post('/notifications/mark-all-read', [\App\Http\Controllers\Api\NotificationController::class, 'markAllAsRead']); // Mark all as read
     
     // ========== Packages & Wallet Routes ==========
     
@@ -150,6 +155,15 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/deposit', [WalletController::class, 'initiateDeposit']); // Charge wallet (initiate payment)
         Route::post('/withdrawal', [WalletController::class, 'initiateWithdrawal']); // Withdraw from wallet
         Route::post('/purchase-package', [WalletController::class, 'purchasePackage']); // Purchase package with wallet balance
+    });
+
+    // ========== Friendship Routes ==========
+    Route::prefix('friends')->group(function () {
+        Route::post('/request', [\App\Http\Controllers\Api\FriendshipController::class, 'sendRequest']); // Send friend request
+        Route::post('/accept', [\App\Http\Controllers\Api\FriendshipController::class, 'acceptRequest']); // Accept friend request
+        Route::post('/decline', [\App\Http\Controllers\Api\FriendshipController::class, 'declineRequest']); // Decline friend request
+        Route::get('/pending', [\App\Http\Controllers\Api\FriendshipController::class, 'getPendingRequests']); // Get pending requests
+        Route::get('/list', [\App\Http\Controllers\Api\FriendshipController::class, 'getFriends']); // Get list of friends
     });
 
     // ========== Chat Routes (Real-time with Pusher) ==========
