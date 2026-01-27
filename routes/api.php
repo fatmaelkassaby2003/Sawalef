@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\WalletController;
 use App\Http\Controllers\Api\FawaterakWebhookController;
 use App\Http\Controllers\Api\StaticPageController;
 use App\Http\Controllers\Api\SupportController;
+use App\Http\Controllers\Api\AdvertisementController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -103,6 +104,9 @@ Route::get('/terms', [StaticPageController::class, 'getTerms']);
 Route::get('/privacy-policy', [StaticPageController::class, 'getPrivacyPolicy']);
 Route::get('/about-app', [StaticPageController::class, 'getAboutApp']);
 Route::get('/faqs', [StaticPageController::class, 'getFaqs']);
+
+// Advertisements
+Route::get('/advertisements', [AdvertisementController::class, 'index']);
 
 // Support
 Route::get('/issue-types', [SupportController::class, 'getIssueTypes']);

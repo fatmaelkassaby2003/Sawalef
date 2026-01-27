@@ -1,0 +1,41 @@
+{
+    "info": {
+        "_postman_id": "893962b1-50e4-4475-ae9e-1e9a7e6b7c8d",
+        "name": "Sawalef Advertisements",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Get Advertisements",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/advertisements",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "advertisements"
+                    ]
+                },
+                "description": "Get all active advertisements with image and text."
+            },
+            "response": []
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://your-domain.com",
+            "type": "string"
+        }
+    ]
+}
