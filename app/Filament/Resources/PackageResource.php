@@ -136,6 +136,7 @@ class PackageResource extends Resource
                     ->falseLabel('غير نشطة فقط'),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
@@ -158,6 +159,7 @@ class PackageResource extends Resource
         return [
             'index' => Pages\ListPackages::route('/'),
             'create' => Pages\CreatePackage::route('/create'),
+            'view' => Pages\ViewPackage::route('/{record}'),
             'edit' => Pages\EditPackage::route('/{record}/edit'),
         ];
     }

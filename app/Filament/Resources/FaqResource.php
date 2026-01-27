@@ -52,11 +52,9 @@ class FaqResource extends Resource
                     ->schema([
                         Forms\Components\TextInput::make('question_en')
                             ->label('Question (EN)')
-                            ->required()
                             ->maxLength(255),
                         Forms\Components\RichEditor::make('answer_en')
                             ->label('Answer (EN)')
-                            ->required()
                             ->columnSpanFull(),
                     ])->columnSpan(1),
             ])->columns(2);
@@ -81,6 +79,7 @@ class FaqResource extends Resource
                 //
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
@@ -103,6 +102,7 @@ class FaqResource extends Resource
         return [
             'index' => Pages\ListFaqs::route('/'),
             'create' => Pages\CreateFaq::route('/create'),
+            'view' => Pages\ViewFaq::route('/{record}'),
             'edit' => Pages\EditFaq::route('/{record}/edit'),
         ];
     }

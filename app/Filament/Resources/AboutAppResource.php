@@ -56,7 +56,6 @@ class AboutAppResource extends Resource
                             ->maxLength(255),
                         Forms\Components\RichEditor::make('content_en')
                             ->label('Content (EN)')
-                            ->required()
                             ->columnSpanFull(),
                     ])->columnSpan(1),
             ])->columns(2);
@@ -82,12 +81,9 @@ class AboutAppResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                // No bulk actions
             ]);
     }
 
@@ -103,7 +99,22 @@ class AboutAppResource extends Resource
         return [
             'index' => Pages\ListAboutApps::route('/'),
             'create' => Pages\CreateAboutApp::route('/create'),
+            'view' => Pages\ViewAboutApp::route('/{record}'),
             'edit' => Pages\EditAboutApp::route('/{record}/edit'),
         ];
+    }
+    public static function canCreate(): bool
+    {
+        return AboutApp::count() < 1;
+    }
+
+    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return false;
+    }
+
+    public static function canDeleteAny(): bool
+    {
+        return false;
     }
 }

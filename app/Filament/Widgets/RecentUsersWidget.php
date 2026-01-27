@@ -25,8 +25,8 @@ class RecentUsersWidget extends BaseWidget
                 Tables\Columns\TextColumn::make('name')
                     ->label('الاسم')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('email')
-                    ->label('البريد الإلكتروني'),
+                Tables\Columns\TextColumn::make('phone')
+                    ->label('رقم الهاتف'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاريخ التسجيل')
                     ->dateTime()

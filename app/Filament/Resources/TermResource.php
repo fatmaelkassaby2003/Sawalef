@@ -56,7 +56,6 @@ class TermResource extends Resource
                             ->maxLength(255),
                         Forms\Components\RichEditor::make('content_en')
                             ->label('Content (EN)')
-                            ->required()
                             ->columnSpanFull(),
                     ])->columnSpan(1),
             ])->columns(2);
@@ -81,6 +80,7 @@ class TermResource extends Resource
                 //
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
@@ -103,6 +103,7 @@ class TermResource extends Resource
         return [
             'index' => Pages\ListTerms::route('/'),
             'create' => Pages\CreateTerm::route('/create'),
+            'view' => Pages\ViewTerm::route('/{record}'),
             'edit' => Pages\EditTerm::route('/{record}/edit'),
         ];
     }

@@ -88,6 +88,7 @@ class AdvertisementResource extends Resource
                     ->falseLabel('غير نشط'),
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
@@ -110,6 +111,7 @@ class AdvertisementResource extends Resource
         return [
             'index' => Pages\ListAdvertisements::route('/'),
             'create' => Pages\CreateAdvertisement::route('/create'),
+            'view' => Pages\ViewAdvertisement::route('/{record}'),
             'edit' => Pages\EditAdvertisement::route('/{record}/edit'),
         ];
     }

@@ -56,7 +56,6 @@ class PrivacyPolicyResource extends Resource
                             ->maxLength(255),
                         Forms\Components\RichEditor::make('content_en')
                             ->label('Content (EN)')
-                            ->required()
                             ->columnSpanFull(),
                     ])->columnSpan(1),
             ])->columns(2);
@@ -81,6 +80,7 @@ class PrivacyPolicyResource extends Resource
                 //
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
@@ -103,6 +103,7 @@ class PrivacyPolicyResource extends Resource
         return [
             'index' => Pages\ListPrivacyPolicies::route('/'),
             'create' => Pages\CreatePrivacyPolicy::route('/create'),
+            'view' => Pages\ViewPrivacyPolicy::route('/{record}'),
             'edit' => Pages\EditPrivacyPolicy::route('/{record}/edit'),
         ];
     }

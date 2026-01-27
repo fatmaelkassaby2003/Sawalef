@@ -193,6 +193,7 @@ class WalletTransactionResource extends Resource
     {
         return [
             'index' => Pages\ListWalletTransactions::route('/'),
+            'view' => Pages\ViewWalletTransaction::route('/{record}'),
             'edit' => Pages\EditWalletTransaction::route('/{record}/edit'),
         ];
     }

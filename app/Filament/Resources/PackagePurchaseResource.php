@@ -149,6 +149,7 @@ class PackagePurchaseResource extends Resource
     {
         return [
             'index' => Pages\ListPackagePurchases::route('/'),
+            'view' => Pages\ViewPackagePurchase::route('/{record}'),
         ];
     }
     

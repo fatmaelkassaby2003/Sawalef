@@ -42,7 +42,6 @@ class IssueTypeResource extends Resource
                     ->maxLength(255),
                 Forms\Components\TextInput::make('name_en')
                     ->label('Name (EN)')
-                    ->required()
                     ->maxLength(255),
             ]);
     }
@@ -67,6 +66,7 @@ class IssueTypeResource extends Resource
                 //
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
@@ -89,6 +89,7 @@ class IssueTypeResource extends Resource
         return [
             'index' => Pages\ListIssueTypes::route('/'),
             'create' => Pages\CreateIssueType::route('/create'),
+            'view' => Pages\ViewIssueType::route('/{record}'),
             'edit' => Pages\EditIssueType::route('/{record}/edit'),
         ];
     }
