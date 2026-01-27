@@ -104,6 +104,11 @@ class User extends Authenticatable implements FilamentUser, JWTSubject
         return $this->hasMany(FriendRequest::class, 'receiver_id');
     }
 
+    public function supportTickets()
+    {
+        return $this->hasMany(SupportTicket::class);
+    }
+
     /**
      * Check if the user is friends with another user.
      */

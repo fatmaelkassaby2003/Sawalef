@@ -7,6 +7,8 @@ use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\PackageController;
 use App\Http\Controllers\Api\WalletController;
 use App\Http\Controllers\Api\FawaterakWebhookController;
+use App\Http\Controllers\Api\StaticPageController;
+use App\Http\Controllers\Api\SupportController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -95,6 +97,16 @@ Route::post('/verify', [AuthController::class, 'verify']); // Verify OTP code
 
 // Public hobby routes
 Route::get('/hobbies', [HobbyController::class, 'index']); // List all hobbies
+
+// Public Static Pages
+Route::get('/terms', [StaticPageController::class, 'getTerms']);
+Route::get('/privacy-policy', [StaticPageController::class, 'getPrivacyPolicy']);
+Route::get('/about-app', [StaticPageController::class, 'getAboutApp']);
+Route::get('/faqs', [StaticPageController::class, 'getFaqs']);
+
+// Support
+Route::get('/issue-types', [SupportController::class, 'getIssueTypes']);
+Route::post('/support/tickets', [SupportController::class, 'storeTicket']); // Open to both guests and auth users
 
 // Protected routes (require authentication)
 Route::middleware('auth:api')->group(function () {
