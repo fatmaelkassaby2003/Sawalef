@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             HobbySeeder::class,
             UserSeeder::class,
             AdvertisementSeeder::class,
+            AdminContactSeeder::class,
         ]);
     }
 }

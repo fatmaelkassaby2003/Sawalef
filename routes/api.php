@@ -104,6 +104,7 @@ Route::get('/terms', [StaticPageController::class, 'getTerms']);
 Route::get('/privacy-policy', [StaticPageController::class, 'getPrivacyPolicy']);
 Route::get('/about-app', [StaticPageController::class, 'getAboutApp']);
 Route::get('/faqs', [StaticPageController::class, 'getFaqs']);
+Route::get('/admin-contact', [StaticPageController::class, 'getAdminContact']);
 
 // Advertisements
 Route::get('/advertisements', [AdvertisementController::class, 'index']);

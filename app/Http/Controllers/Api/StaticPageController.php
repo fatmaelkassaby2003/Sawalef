@@ -7,6 +7,7 @@ use App\Models\AboutApp;
 use App\Models\Faq;
 use App\Models\PrivacyPolicy;
 use App\Models\Term;
+use App\Models\AdminContact;
 use Illuminate\Http\Request;
 
 class StaticPageController extends Controller
@@ -47,6 +48,16 @@ class StaticPageController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'FAQs retrieved successfully',
+            'data' => $data
+        ]);
+    }
+
+    public function getAdminContact()
+    {
+        $data = AdminContact::first();
+        return response()->json([
+            'status' => true,
+            'message' => 'Admin contact retrieved successfully',
             'data' => $data
         ]);
     }
