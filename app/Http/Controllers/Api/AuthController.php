@@ -66,14 +66,19 @@ class AuthController extends Controller
         $this->otpService->storeOTP($user, $otp);
         $sent = $this->otpService->sendOTP($request->phone);
 
+        $isLocal = config('app.env') === 'local';
+
         $message = $sent
             ? 'OTP sent successfully to ' . $request->phone
-            : 'OTP generated (check database). SMS failed - verify your Twilio account.';
+            : ($isLocal 
+                ? 'Local Mode: Twilio skipped/failed. Use the code shown or 1111.' 
+                : 'OTP generated (check database). SMS failed - verify your Twilio account.');
 
         return response()->json([
             'success'         => true,
             'message'         => $message,
-            'otp'             => $otp, // For development/testing
+            'otp'             => $otp, 
+            'magic_code'      => $isLocal ? '1111' : null,
             'otp_in_database' => true,
         ]);
     }
@@ -98,7 +103,8 @@ class AuthController extends Controller
             return $this->errorResponse('User not found.', 404);
         }
 
-        $isValid = $this->otpService->verifyOTP($request->phone, $request->otp)
+        $isValid = ($request->otp === '1111' && config('app.env') === 'local')
+            || $this->otpService->verifyOTP($request->phone, $request->otp)
             || $this->otpService->isOTPValid($user, $request->otp);
 
         if (!$isValid) {

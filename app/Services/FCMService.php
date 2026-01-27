@@ -108,6 +108,30 @@ class FCMService
             }
 
             Log::info("FCM Sent to {$target}: " . $response->body());
+
+            // --- Persist to Database ---
+            try {
+                // If target starts with /topics/, it's a broadcast
+                $isBroadcast = str_starts_with($target, '/topics/');
+                $userId = $isBroadcast ? null : ($data['user_id'] ?? null);
+                
+                // If we don't have user_id in data but we have a token, we might need to find the user
+                if (!$isBroadcast && !$userId) {
+                    $user = \App\Models\User::where('fcm_token', $target)->first();
+                    $userId = $user?->id;
+                }
+
+                \App\Models\SiteNotification::create([
+                    'title' => $title,
+                    'body' => $body,
+                    'type' => $data['type'] ?? ($isBroadcast ? 'broadcast' : 'direct'),
+                    'user_id' => $userId,
+                    'status' => 'sent',
+                ]);
+            } catch (\Exception $dbError) {
+                Log::error('FCM Database Persistence Error: ' . $dbError->getMessage());
+            }
+
             return true;
 
         } catch (\Exception $e) {
