@@ -375,9 +375,11 @@ class PostController extends Controller
                 'name' => $post->user->name,
                 'nickname' => $post->user->nickname,
                 'profile_image' => $post->user->profile_image ? asset(Storage::url($post->user->profile_image)) : null,
-                'friendship_status' => ($currentUser && $currentUser->id != $post->user->id) 
-                    ? $currentUser->getFriendshipStatus($post->user->id) 
-                    : 'not_friend',
+                'friendship_status' => !$currentUser 
+                    ? 'not_friend'
+                    : ($currentUser->id == $post->user->id 
+                        ? 'my-self' 
+                        : $currentUser->getFriendshipStatus($post->user->id)),
             ],
             'comments' => $post->comments->map(function($comment) use ($currentUser) {
                 return [
@@ -388,9 +390,11 @@ class PostController extends Controller
                         'id' => $comment->user->id,
                         'name' => $comment->user->name,
                         'profile_image' => $comment->user->profile_image ? asset(Storage::url($comment->user->profile_image)) : null,
-                        'friendship_status' => ($currentUser && $currentUser->id != $comment->user->id) 
-                            ? $currentUser->getFriendshipStatus($comment->user->id) 
-                            : 'not_friend',
+                        'friendship_status' => !$currentUser 
+                            ? 'not_friend'
+                            : ($currentUser->id == $comment->user->id 
+                                ? 'my-self' 
+                                : $currentUser->getFriendshipStatus($comment->user->id)),
                     ],
                 ];
             }),
