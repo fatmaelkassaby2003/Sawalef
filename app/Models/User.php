@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use App\Models\FriendRequest;
 
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
@@ -132,6 +133,11 @@ class User extends Authenticatable implements FilamentUser, JWTSubject
      */
     public function getFriendshipStatus($userId)
     {
+        \Log::info('getFriendshipStatus called', [
+            'current_user_id' => $this->id,
+            'target_user_id' => $userId
+        ]);
+
         // Check if they are already friends
         $friendRequest = FriendRequest::where(function ($query) use ($userId) {
             $query->where(function ($q) use ($userId) {
@@ -142,6 +148,11 @@ class User extends Authenticatable implements FilamentUser, JWTSubject
                   ->where('receiver_id', $this->id);
             });
         })->first();
+
+        \Log::info('FriendRequest query result', [
+            'found' => $friendRequest ? 'yes' : 'no',
+            'status' => $friendRequest?->status ?? 'null'
+        ]);
 
         if (!$friendRequest) {
             return 'not_friend';

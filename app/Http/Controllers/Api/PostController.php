@@ -336,7 +336,7 @@ class PostController extends Controller
             ];
         });
 
-        $currentUser = auth('sanctum')->user();
+        $currentUser = auth('api')->user();
 
         return response()->json([
             'success' => true,
@@ -352,12 +352,15 @@ class PostController extends Controller
         ]);
     }
 
-    /**
-     * Helper to format post data
-     */
     private function formatPost($post)
     {
-        $currentUser = auth('sanctum')->user();
+        $currentUser = auth('api')->user();
+        
+        \Log::info('formatPost called', [
+            'post_id' => $post->id,
+            'post_user_id' => $post->user->id,
+            'current_user' => $currentUser ? $currentUser->id : 'null'
+        ]);
         
         return [
             'id' => $post->id,
@@ -372,7 +375,9 @@ class PostController extends Controller
                 'name' => $post->user->name,
                 'nickname' => $post->user->nickname,
                 'profile_image' => $post->user->profile_image ? asset(Storage::url($post->user->profile_image)) : null,
-                'friendship_status' => $currentUser ? $currentUser->getFriendshipStatus($post->user->id) : 'not_friend',
+                'friendship_status' => ($currentUser && $currentUser->id != $post->user->id) 
+                    ? $currentUser->getFriendshipStatus($post->user->id) 
+                    : 'not_friend',
             ],
             'comments' => $post->comments->map(function($comment) use ($currentUser) {
                 return [
@@ -383,11 +388,13 @@ class PostController extends Controller
                         'id' => $comment->user->id,
                         'name' => $comment->user->name,
                         'profile_image' => $comment->user->profile_image ? asset(Storage::url($comment->user->profile_image)) : null,
-                        'friendship_status' => $currentUser ? $currentUser->getFriendshipStatus($comment->user->id) : 'not_friend',
+                        'friendship_status' => ($currentUser && $currentUser->id != $comment->user->id) 
+                            ? $currentUser->getFriendshipStatus($comment->user->id) 
+                            : 'not_friend',
                     ],
                 ];
             }),
-            'liked_by_current_user' => auth('sanctum')->check() ? $post->likes()->where('user_id', auth('sanctum')->id())->exists() : false,
+            'liked_by_current_user' => $currentUser ? $post->likes()->where('user_id', $currentUser->id)->exists() : false,
         ];
     }
     
