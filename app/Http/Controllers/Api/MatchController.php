@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Validator;
 class MatchController extends Controller
 {
     /**
-     * Get similar users based on hobbies
+     * Get suggested users based on matching hobbies (includes friends)
      */
     public function getSimilarUsers(Request $request): JsonResponse
     {
@@ -37,7 +37,7 @@ class MatchController extends Controller
             ])
             ->with('hobbies:id,name,icon')
             ->get()
-            ->map(function($otherUser) use ($userHobbyIds) {
+            ->map(function($otherUser) use ($userHobbyIds, $user) {
                 $matchPercentage = 0;
                 if (count($userHobbyIds) > 0) {
                     $matchPercentage = ($otherUser->matching_hobbies_count / count($userHobbyIds)) * 100;
@@ -52,6 +52,7 @@ class MatchController extends Controller
                     'country_en' => $otherUser->country_en,
                     'gender' => $otherUser->gender,
                     'profile_image' => $otherUser->profile_image ? asset('storage/' . $otherUser->profile_image) : null,
+                    'friendship_status' => $user->getFriendshipStatus($otherUser->id),
                     'match_percentage' => round($matchPercentage, 2),
                     'matching_hobbies_count' => $otherUser->matching_hobbies_count,
                     'total_user_hobbies' => count($userHobbyIds),
@@ -74,7 +75,7 @@ class MatchController extends Controller
     }
 
     /**
-     * Search for random user by country with configurable hobby match percentage
+     * Search for random user by country (hobby matching is optional)
      */
     public function searchByCountry(Request $request): JsonResponse
     {
@@ -82,6 +83,7 @@ class MatchController extends Controller
             'country' => 'required|string|max:255',
             'exclude_user_ids' => 'nullable|array',
             'exclude_user_ids.*' => 'integer|exists:users,id',
+            'require_hobby_match' => 'nullable|boolean', // New parameter to optionally require hobby matching
             'min_match_percentage' => 'nullable|integer|min:0|max:100',
         ]);
 
@@ -96,22 +98,10 @@ class MatchController extends Controller
         $currentUser = $request->user();
         $searchCountry = $request->country;
         $excludeUserIds = $request->input('exclude_user_ids', []);
-        $minMatchPercentage = $request->input('min_match_percentage', 50); // Default to 50% instead of 80%
+        $requireHobbyMatch = $request->input('require_hobby_match', false); // Default: no hobby matching required
+        $minMatchPercentage = $request->input('min_match_percentage', 50);
         
-        // Get current user's hobbies
-        $userHobbyIds = $currentUser->hobbies()->pluck('hobbies.id')->toArray();
-        
-        if (empty($userHobbyIds)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Please add hobbies to your profile first to search for users',
-            ], 400);
-        }
-
-        $totalUserHobbies = count($userHobbyIds);
-        $requiredMatches = ceil($totalUserHobbies * ($minMatchPercentage / 100));
-
-        // Find users from the specified country with at least 80% hobby match
+        // Build base query
         $query = User::where('id', '!=', $currentUser->id)
             ->where(function($q) use ($searchCountry) {
                 $q->where('country_ar', $searchCountry)
@@ -122,76 +112,128 @@ class MatchController extends Controller
         if (!empty($excludeUserIds)) {
             $query->whereNotIn('id', $excludeUserIds);
         }
-        
-        $matchingUsers = $query
-            ->whereHas('hobbies', function($query) use ($userHobbyIds, $requiredMatches) {
-                $query->whereIn('hobbies.id', $userHobbyIds);
-            }, '>=', $requiredMatches)
-            ->withCount([
-                'hobbies as matching_hobbies_count' => function($query) use ($userHobbyIds) {
+
+        if ($requireHobbyMatch) {
+            // Get current user's hobbies if hobby matching is required
+            $userHobbyIds = $currentUser->hobbies()->pluck('hobbies.id')->toArray();
+            
+            if (empty($userHobbyIds)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Please add hobbies to your profile first to search for users with hobby matching',
+                ], 400);
+            }
+
+            $totalUserHobbies = count($userHobbyIds);
+            $requiredMatches = ceil($totalUserHobbies * ($minMatchPercentage / 100));
+
+            $matchingUsers = $query
+                ->whereHas('hobbies', function($query) use ($userHobbyIds, $requiredMatches) {
                     $query->whereIn('hobbies.id', $userHobbyIds);
-                }
-            ])
-            ->with('hobbies:id,name,icon')
-            ->get()
-            ->filter(function($user) use ($totalUserHobbies, $requiredMatches) {
-                // Double-check the match percentage
-                return $user->matching_hobbies_count >= $requiredMatches;
-            });
+                }, '>=', $requiredMatches)
+                ->withCount([
+                    'hobbies as matching_hobbies_count' => function($query) use ($userHobbyIds) {
+                        $query->whereIn('hobbies.id', $userHobbyIds);
+                    }
+                ])
+                ->with('hobbies:id,name,icon')
+                ->get()
+                ->filter(function($user) use ($totalUserHobbies, $requiredMatches) {
+                    return $user->matching_hobbies_count >= $requiredMatches;
+                });
 
-        if ($matchingUsers->isEmpty()) {
-            $message = !empty($excludeUserIds) && count($excludeUserIds) > 0
-                ? "No more users found in {$searchCountry} with at least {$minMatchPercentage}% hobby match"
-                : "No users found in {$searchCountry} with at least {$minMatchPercentage}% hobby match";
-                
+            if ($matchingUsers->isEmpty()) {
+                $message = !empty($excludeUserIds) && count($excludeUserIds) > 0
+                    ? "No more users found in {$searchCountry} with at least {$minMatchPercentage}% hobby match"
+                    : "No users found in {$searchCountry} with at least {$minMatchPercentage}% hobby match";
+                    
+                return response()->json([
+                    'success' => false,
+                    'message' => $message,
+                    'required_matches' => $requiredMatches,
+                    'your_total_hobbies' => $totalUserHobbies,
+                    'excluded_count' => count($excludeUserIds),
+                    'min_match_percentage' => $minMatchPercentage,
+                ], 404);
+            }
+
+            $randomUser = $matchingUsers->random();
+            $matchPercentage = ($randomUser->matching_hobbies_count / $totalUserHobbies) * 100;
+
             return response()->json([
-                'success' => false,
-                'message' => $message,
-                'required_matches' => $requiredMatches,
-                'your_total_hobbies' => $totalUserHobbies,
-                'excluded_count' => count($excludeUserIds),
-                'min_match_percentage' => $minMatchPercentage,
-            ], 404);
+                'success' => true,
+                'message' => 'Random user found successfully',
+                'user' => [
+                    'id' => $randomUser->id,
+                    'name' => $randomUser->name,
+                    'nickname' => $randomUser->nickname,
+                    'age' => $randomUser->age,
+                    'country_ar' => $randomUser->country_ar,
+                    'country_en' => $randomUser->country_en,
+                    'gender' => $randomUser->gender,
+                    'profile_image' => $randomUser->profile_image ? asset('storage/' . $randomUser->profile_image) : null,
+                    'phone' => $randomUser->phone,
+                    'friendship_status' => $currentUser->getFriendshipStatus($randomUser->id),
+                    'match_percentage' => round($matchPercentage, 2),
+                    'matching_hobbies_count' => $randomUser->matching_hobbies_count,
+                    'your_total_hobbies' => $totalUserHobbies,
+                    'required_matches_for_threshold' => $requiredMatches,
+                    'min_match_percentage_used' => $minMatchPercentage,
+                    'hobbies' => $randomUser->hobbies->map(function($hobby) {
+                        return [
+                            'id' => $hobby->id,
+                            'name' => $hobby->name,
+                            'icon' => $hobby->icon ? asset($hobby->icon) : null,
+                        ];
+                    }),
+                ],
+                'total_matching_users_in_country' => $matchingUsers->count(),
+                'remaining_users' => $matchingUsers->count() - 1,
+            ]);
+        } else {
+            // No hobby matching required - just find random users from the country
+            $users = $query->with('hobbies:id,name,icon')->get();
+
+            if ($users->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "No users found in {$searchCountry}",
+                    'excluded_count' => count($excludeUserIds),
+                ], 404);
+            }
+
+            $randomUser = $users->random();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Random user found successfully',
+                'user' => [
+                    'id' => $randomUser->id,
+                    'name' => $randomUser->name,
+                    'nickname' => $randomUser->nickname,
+                    'age' => $randomUser->age,
+                    'country_ar' => $randomUser->country_ar,
+                    'country_en' => $randomUser->country_en,
+                    'gender' => $randomUser->gender,
+                    'profile_image' => $randomUser->profile_image ? asset('storage/' . $randomUser->profile_image) : null,
+                    'phone' => $randomUser->phone,
+                    'friendship_status' => $currentUser->getFriendshipStatus($randomUser->id),
+                    'hobbies' => $randomUser->hobbies->map(function($hobby) {
+                        return [
+                            'id' => $hobby->id,
+                            'name' => $hobby->name,
+                            'icon' => $hobby->icon ? asset($hobby->icon) : null,
+                        ];
+                    }),
+                ],
+                'total_users_in_country' => $users->count(),
+                'remaining_users' => $users->count() - 1,
+            ]);
         }
-
-        // Select a random user from the matching users
-        $randomUser = $matchingUsers->random();
-        
-        $matchPercentage = ($randomUser->matching_hobbies_count / $totalUserHobbies) * 100;
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Random user found successfully',
-            'user' => [
-                'id' => $randomUser->id,
-                'name' => $randomUser->name,
-                'nickname' => $randomUser->nickname,
-                'age' => $randomUser->age,
-                'country_ar' => $randomUser->country_ar,
-                'country_en' => $randomUser->country_en,
-                'gender' => $randomUser->gender,
-                'profile_image' => $randomUser->profile_image ? asset('storage/' . $randomUser->profile_image) : null,
-                'phone' => $randomUser->phone,
-                'match_percentage' => round($matchPercentage, 2),
-                'matching_hobbies_count' => $randomUser->matching_hobbies_count,
-                'your_total_hobbies' => $totalUserHobbies,
-                'required_matches_for_threshold' => $requiredMatches,
-                'min_match_percentage_used' => $minMatchPercentage,
-                'hobbies' => $randomUser->hobbies->map(function($hobby) {
-                    return [
-                        'id' => $hobby->id,
-                        'name' => $hobby->name,
-                        'icon' => $hobby->icon ? asset($hobby->icon) : null,
-                    ];
-                }),
-            ],
-            'total_matching_users_in_country' => $matchingUsers->count(),
-            'remaining_users' => $matchingUsers->count() - 1,
-        ]);
     }
 
     /**
-     * Advanced search with filters
+     * Advanced search with filters (hobby matching is optional)
      */
     public function advancedSearch(Request $request): JsonResponse
     {
@@ -200,6 +242,7 @@ class MatchController extends Controller
             'gender' => 'nullable|in:male,female',
             'min_age' => 'nullable|integer|min:1',
             'max_age' => 'nullable|integer|max:150',
+            'require_hobby_match' => 'nullable|boolean',
             'min_match_percentage' => 'nullable|integer|min:0|max:100',
         ]);
 
@@ -212,18 +255,8 @@ class MatchController extends Controller
         }
 
         $currentUser = $request->user();
-        $userHobbyIds = $currentUser->hobbies()->pluck('hobbies.id')->toArray();
-        
-        if (empty($userHobbyIds)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Please add hobbies to your profile first',
-            ], 400);
-        }
-
-        $totalUserHobbies = count($userHobbyIds);
+        $requireHobbyMatch = $request->input('require_hobby_match', false);
         $minMatchPercentage = $request->input('min_match_percentage', 50);
-        $requiredMatches = ceil($totalUserHobbies * ($minMatchPercentage / 100));
 
         // Build query
         $query = User::where('id', '!=', $currentUser->id);
@@ -248,58 +281,112 @@ class MatchController extends Controller
             $query->where('age', '<=', $request->max_age);
         }
 
-        // Apply hobby matching
-        $matchingUsers = $query
-            ->whereHas('hobbies', function($q) use ($userHobbyIds) {
-                $q->whereIn('hobbies.id', $userHobbyIds);
-            })
-            ->withCount([
-                'hobbies as matching_hobbies_count' => function($q) use ($userHobbyIds) {
-                    $q->whereIn('hobbies.id', $userHobbyIds);
-                }
-            ])
-            ->with('hobbies:id,name,icon')
-            ->get()
-            ->filter(function($user) use ($requiredMatches) {
-                return $user->matching_hobbies_count >= $requiredMatches;
-            })
-            ->map(function($user) use ($totalUserHobbies) {
-                $matchPercentage = ($user->matching_hobbies_count / $totalUserHobbies) * 100;
-                
-                return [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'nickname' => $user->nickname,
-                    'age' => $user->age,
-                    'country_ar' => $user->country_ar,
-                    'country_en' => $user->country_en,
-                    'gender' => $user->gender,
-                    'profile_image' => $user->profile_image ? asset('storage/' . $user->profile_image) : null,
-                    'match_percentage' => round($matchPercentage, 2),
-                    'matching_hobbies_count' => $user->matching_hobbies_count,
-                    'hobbies' => $user->hobbies->map(function($hobby) {
-                        return [
-                            'id' => $hobby->id,
-                            'name' => $hobby->name,
-                            'icon' => $hobby->icon ? asset($hobby->icon) : null,
-                        ];
-                    }),
-                ];
-            })
-            ->sortByDesc('match_percentage')
-            ->values();
+        if ($requireHobbyMatch) {
+            // Apply hobby matching
+            $userHobbyIds = $currentUser->hobbies()->pluck('hobbies.id')->toArray();
+            
+            if (empty($userHobbyIds)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Please add hobbies to your profile first for hobby-based matching',
+                ], 400);
+            }
 
-        return response()->json([
-            'success' => true,
-            'users' => $matchingUsers,
-            'total_found' => $matchingUsers->count(),
-            'filters_applied' => [
-                'country' => $request->country,
-                'gender' => $request->gender,
-                'min_age' => $request->min_age,
-                'max_age' => $request->max_age,
-                'min_match_percentage' => $minMatchPercentage,
-            ],
-        ]);
+            $totalUserHobbies = count($userHobbyIds);
+            $requiredMatches = ceil($totalUserHobbies * ($minMatchPercentage / 100));
+
+            $matchingUsers = $query
+                ->whereHas('hobbies', function($q) use ($userHobbyIds) {
+                    $q->whereIn('hobbies.id', $userHobbyIds);
+                })
+                ->withCount([
+                    'hobbies as matching_hobbies_count' => function($q) use ($userHobbyIds) {
+                        $q->whereIn('hobbies.id', $userHobbyIds);
+                    }
+                ])
+                ->with('hobbies:id,name,icon')
+                ->get()
+                ->filter(function($user) use ($requiredMatches) {
+                    return $user->matching_hobbies_count >= $requiredMatches;
+                })
+                ->map(function($user) use ($totalUserHobbies, $currentUser) {
+                    $matchPercentage = ($user->matching_hobbies_count / $totalUserHobbies) * 100;
+                    
+                    return [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'nickname' => $user->nickname,
+                        'age' => $user->age,
+                        'country_ar' => $user->country_ar,
+                        'country_en' => $user->country_en,
+                        'gender' => $user->gender,
+                        'profile_image' => $user->profile_image ? asset('storage/' . $user->profile_image) : null,
+                        'friendship_status' => $currentUser->getFriendshipStatus($user->id),
+                        'match_percentage' => round($matchPercentage, 2),
+                        'matching_hobbies_count' => $user->matching_hobbies_count,
+                        'hobbies' => $user->hobbies->map(function($hobby) {
+                            return [
+                                'id' => $hobby->id,
+                                'name' => $hobby->name,
+                                'icon' => $hobby->icon ? asset($hobby->icon) : null,
+                            ];
+                        }),
+                    ];
+                })
+                ->sortByDesc('match_percentage')
+                ->values();
+
+            return response()->json([
+                'success' => true,
+                'users' => $matchingUsers,
+                'total_found' => $matchingUsers->count(),
+                'filters_applied' => [
+                    'country' => $request->country,
+                    'gender' => $request->gender,
+                    'min_age' => $request->min_age,
+                    'max_age' => $request->max_age,
+                    'require_hobby_match' => true,
+                    'min_match_percentage' => $minMatchPercentage,
+                ],
+            ]);
+        } else {
+            // No hobby matching - just apply the filters and return users
+            $users = $query
+                ->with('hobbies:id,name,icon')
+                ->get()
+                ->map(function($user) use ($currentUser) {
+                    return [
+                        'id' => $user->id,
+                        'name' => $user->name,
+                        'nickname' => $user->nickname,
+                        'age' => $user->age,
+                        'country_ar' => $user->country_ar,
+                        'country_en' => $user->country_en,
+                        'gender' => $user->gender,
+                        'profile_image' => $user->profile_image ? asset('storage/' . $user->profile_image) : null,
+                        'friendship_status' => $currentUser->getFriendshipStatus($user->id),
+                        'hobbies' => $user->hobbies->map(function($hobby) {
+                            return [
+                                'id' => $hobby->id,
+                                'name' => $hobby->name,
+                                'icon' => $hobby->icon ? asset($hobby->icon) : null,
+                            ];
+                        }),
+                    ];
+                });
+
+            return response()->json([
+                'success' => true,
+                'users' => $users,
+                'total_found' => $users->count(),
+                'filters_applied' => [
+                    'country' => $request->country,
+                    'gender' => $request->gender,
+                    'min_age' => $request->min_age,
+                    'max_age' => $request->max_age,
+                    'require_hobby_match' => false,
+                ],
+            ]);
+        }
     }
 }

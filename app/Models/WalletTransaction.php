@@ -17,7 +17,7 @@ class WalletTransaction extends Model
         'balance_after',
         'status',
         'payment_method',
-        'fawaterak_invoice_id',
+        'gateway_invoice_id',
         'reference_number',
         'notes',
     ];

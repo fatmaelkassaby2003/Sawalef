@@ -127,6 +127,43 @@ class User extends Authenticatable implements FilamentUser, JWTSubject
     }
 
     /**
+     * Get the friendship status with another user.
+     * Returns: 'friend', 'pending_sent', 'pending_received', or 'not_friend'
+     */
+    public function getFriendshipStatus($userId)
+    {
+        // Check if they are already friends
+        $friendRequest = FriendRequest::where(function ($query) use ($userId) {
+            $query->where(function ($q) use ($userId) {
+                $q->where('sender_id', $this->id)
+                  ->where('receiver_id', $userId);
+            })->orWhere(function ($q) use ($userId) {
+                $q->where('sender_id', $userId)
+                  ->where('receiver_id', $this->id);
+            });
+        })->first();
+
+        if (!$friendRequest) {
+            return 'not_friend';
+        }
+
+        if ($friendRequest->status == 'accepted') {
+            return 'friend';
+        }
+
+        if ($friendRequest->status == 'pending') {
+            // Check who sent the request
+            if ($friendRequest->sender_id == $this->id) {
+                return 'pending_sent'; // Current user sent the request
+            } else {
+                return 'pending_received'; // Current user received the request
+            }
+        }
+
+        return 'not_friend';
+    }
+
+    /**
      * Get the identifier that will be stored in the subject claim of the JWT.
      *
      * @return mixed

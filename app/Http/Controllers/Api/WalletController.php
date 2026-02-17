@@ -7,18 +7,18 @@ use App\Models\User;
 use App\Models\WalletTransaction;
 use App\Models\Package;
 use App\Models\PackagePurchase;
-use App\Services\FawaterakService;
+use App\Services\MyFatoorahService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class WalletController extends Controller
 {
-    protected $fawaterakService;
+    protected $myFatoorahService;
 
-    public function __construct(FawaterakService $fawaterakService)
+    public function __construct(MyFatoorahService $myFatoorahService)
     {
-        $this->fawaterakService = $fawaterakService;
+        $this->myFatoorahService = $myFatoorahService;
     }
 
     /**
@@ -75,38 +75,15 @@ class WalletController extends Controller
     }
 
     /**
-     * Get available payment methods from Fawaterak
+     * Get available payment methods
      */
     public function paymentMethods()
     {
-        try {
-            $result = $this->fawaterakService->getPaymentMethods();
-
-            // If Fawaterak API fails or returns empty data, return static payment methods
-            if (!$result['success'] || empty($result['data'])) {
-                return response()->json([
-                    'status' => true,
-                    'message' => 'تم جلب طرق الدفع بنجاح',
-                    'data' => $this->getStaticPaymentMethods(),
-                    'note' => 'قيد التفعيل - سيتم تفعيل بوابة الدفع قريباً'
-                ], 200);
-            }
-
-            return response()->json([
-                'status' => true,
-                'message' => 'تم جلب طرق الدفع بنجاح',
-                'data' => $result['data']
-            ], 200);
-
-        } catch (\Exception $e) {
-            // Return static methods as fallback
-            return response()->json([
-                'status' => true,
-                'message' => 'تم جلب طرق الدفع بنجاح',
-                'data' => $this->getStaticPaymentMethods(),
-                'note' => 'قيد التفعيل - سيتم تفعيل بوابة الدفع قريباً'
-            ], 200);
-        }
+        return response()->json([
+            'status' => true,
+            'message' => 'تم جلب طرق الدفع بنجاح',
+            'data' => $this->getStaticPaymentMethods(),
+        ], 200);
     }
 
     /**
@@ -145,56 +122,26 @@ class WalletController extends Controller
                 'reference_number' => WalletTransaction::generateReferenceNumber(),
             ]);
 
-            // 🧪 TEST MODE: Skip Fawaterak API and create mock payment URL
-            $testMode = true; // Set to false when Fawaterak is ready
-            
-            if ($testMode) {
-                // Mock payment URL for testing
-                $paymentUrl = url('/payment/test?transaction_id=' . $transaction->id . '&amount=' . $amount);
-                $invoiceId = 'TEST_' . $transaction->reference_number;
-                
-                $transaction->update([
-                    'fawaterak_invoice_id' => $invoiceId,
-                    'notes' => 'وضع الاختبار - TEST MODE'
-                ]);
-                
-                DB::commit();
-                
-                return response()->json([
-                    'status' => true,
-                    'message' => 'تم إنشاء عملية الدفع بنجاح (وضع الاختبار)',
-                    'data' => [
-                        'transaction_id' => $transaction->id,
-                        'reference_number' => $transaction->reference_number,
-                        'payment_url' => $paymentUrl,
-                        'invoice_id' => $invoiceId,
-                        'test_mode' => true,
-                        'note' => 'هذا رابط تجريبي - سيتم تفعيل بوابة الدفع الحقيقية قريباً'
-                    ]
-                ], 200);
-            }
-
-            // PRODUCTION MODE: Use actual Fawaterak API
-            $invoiceResult = $this->fawaterakService->createInvoice([
-                'payment_method_id' => $request->payment_method_id,
+            // 🧪 MYFATOORAH INTEGRATION
+            $paymentResult = $this->myFatoorahService->sendPayment([
                 'amount' => $amount,
                 'customer_name' => $user->name,
                 'customer_email' => $user->email ?? $user->phone . '@sawalef.com',
                 'customer_phone' => $user->phone,
-                'item_name' => 'شحن محفظة - ' . $amount . ' جنيه',
+                'reference_number' => $transaction->reference_number,
             ]);
 
-            if (!$invoiceResult['success']) {
+            if (!$paymentResult['success']) {
                 DB::rollBack();
                 return response()->json([
                     'status' => false,
-                    'message' => $invoiceResult['message'] ?? 'فشل في إنشاء عملية الدفع'
+                    'message' => $paymentResult['message'] ?? 'فشل في إنشاء عملية الدفع'
                 ], 500);
             }
 
             // Update transaction with invoice ID
             $transaction->update([
-                'fawaterak_invoice_id' => $invoiceResult['data']['invoice_id'] ?? null,
+                'gateway_invoice_id' => $paymentResult['invoice_id'] ?? null,
             ]);
 
             DB::commit();
@@ -205,8 +152,8 @@ class WalletController extends Controller
                 'data' => [
                     'transaction_id' => $transaction->id,
                     'reference_number' => $transaction->reference_number,
-                    'payment_url' => $invoiceResult['data']['payment_data']['redirectTo'] ?? $invoiceResult['data']['url'] ?? null,
-                    'invoice_id' => $invoiceResult['data']['invoice_id'] ?? null,
+                    'payment_url' => $paymentResult['payment_url'],
+                    'invoice_id' => $paymentResult['invoice_id'],
                 ]
             ], 200);
 

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Post;
 use App\Models\User;
 use App\Models\Comment;
+use App\Services\FCMService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
@@ -13,6 +14,13 @@ use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
+    protected $fcmService;
+
+    public function __construct(FCMService $fcmService)
+    {
+        $this->fcmService = $fcmService;
+    }
+
     /**
      * Get social feed (posts sorted by latest activity)
      */
@@ -245,6 +253,19 @@ class PostController extends Controller
         // Load user for response
         $comment->load('user');
 
+        // Send notification to post owner
+        if ($post->user_id !== $request->user()->id) {
+            $this->fcmService->sendToUser(
+                $post->user_id,
+                'تعليق جديد',
+                "{$request->user()->name} علق على منشورك: " . \Illuminate\Support\Str::limit($request->content, 50),
+                [
+                    'type' => 'new_comment',
+                    'post_id' => (string) $post->id,
+                ]
+            );
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Comment added successfully',
@@ -315,6 +336,8 @@ class PostController extends Controller
             ];
         });
 
+        $currentUser = auth('sanctum')->user();
+
         return response()->json([
             'success' => true,
             'user' => [
@@ -322,6 +345,7 @@ class PostController extends Controller
                 'name' => $user->name,
                 'nickname' => $user->nickname,
                 'profile_image' => $user->profile_image ? asset(Storage::url($user->profile_image)) : null,
+                'friendship_status' => $currentUser ? $currentUser->getFriendshipStatus($user->id) : 'not_friend',
                 'hobbies' => $formattedHobbies,
                 'posts' => $formattedPosts,
             ]
@@ -333,6 +357,8 @@ class PostController extends Controller
      */
     private function formatPost($post)
     {
+        $currentUser = auth('sanctum')->user();
+        
         return [
             'id' => $post->id,
             'content' => $post->content,
@@ -346,8 +372,9 @@ class PostController extends Controller
                 'name' => $post->user->name,
                 'nickname' => $post->user->nickname,
                 'profile_image' => $post->user->profile_image ? asset(Storage::url($post->user->profile_image)) : null,
+                'friendship_status' => $currentUser ? $currentUser->getFriendshipStatus($post->user->id) : 'not_friend',
             ],
-            'comments' => $post->comments->map(function($comment) {
+            'comments' => $post->comments->map(function($comment) use ($currentUser) {
                 return [
                     'id' => $comment->id,
                     'content' => $comment->content,
@@ -356,6 +383,7 @@ class PostController extends Controller
                         'id' => $comment->user->id,
                         'name' => $comment->user->name,
                         'profile_image' => $comment->user->profile_image ? asset(Storage::url($comment->user->profile_image)) : null,
+                        'friendship_status' => $currentUser ? $currentUser->getFriendshipStatus($comment->user->id) : 'not_friend',
                     ],
                 ];
             }),

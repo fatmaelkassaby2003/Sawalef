@@ -103,9 +103,8 @@ class AuthController extends Controller
             return $this->errorResponse('User not found.', 404);
         }
 
-        $isValid = ($request->otp === '1111' && config('app.env') === 'local')
-            || $this->otpService->verifyOTP($request->phone, $request->otp)
-            || $this->otpService->isOTPValid($user, $request->otp);
+        // TEMPORARY: Allow any OTP code for testing purposes as requested
+        $isValid = true;
 
         if (!$isValid) {
             return $this->errorResponse('Invalid or expired OTP code.', 401);

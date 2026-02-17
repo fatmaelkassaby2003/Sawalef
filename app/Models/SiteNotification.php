@@ -13,8 +13,13 @@ class SiteNotification extends Model
         'title',
         'body',
         'type',
+        'data',
         'user_id',
         'status',
+    ];
+
+    protected $casts = [
+        'data' => 'array',
     ];
 
     /**

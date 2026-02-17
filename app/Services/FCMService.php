@@ -83,6 +83,16 @@ class FCMService
 
             $url = "https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send";
 
+            // Convert nested arrays/objects to JSON strings for FCM
+            $fcmData = [];
+            foreach ($data as $key => $value) {
+                if (is_array($value) || is_object($value)) {
+                    $fcmData[$key] = json_encode($value);
+                } else {
+                    $fcmData[$key] = (string) $value;
+                }
+            }
+
             $payload = [
                 'message' => [
                     'token' => str_starts_with($target, '/topics/') ? null : $target,
@@ -91,7 +101,7 @@ class FCMService
                         'title' => $title,
                         'body' => $body,
                     ],
-                    'data' => $data, // Custom data (e.g., click_action, type)
+                    'data' => $fcmData, // Use FCM-ready data (all strings)
                 ]
             ];
 
@@ -125,6 +135,7 @@ class FCMService
                     'title' => $title,
                     'body' => $body,
                     'type' => $data['type'] ?? ($isBroadcast ? 'broadcast' : 'direct'),
+                    'data' => $data, // Store complete data payload
                     'user_id' => $userId,
                     'status' => 'sent',
                 ]);

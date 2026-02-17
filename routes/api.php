@@ -6,7 +6,7 @@ use App\Http\Controllers\Api\MatchController;
 use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\PackageController;
 use App\Http\Controllers\Api\WalletController;
-use App\Http\Controllers\Api\FawaterakWebhookController;
+use App\Http\Controllers\Api\MyFatoorahWebhookController;
 use App\Http\Controllers\Api\StaticPageController;
 use App\Http\Controllers\Api\SupportController;
 use App\Http\Controllers\Api\AdvertisementController;
@@ -134,6 +134,9 @@ Route::middleware('auth:api')->group(function () {
     // Matching
     Route::get('/similar-users', [MatchController::class, 'getSimilarUsers']);
     Route::post('/search-by-country', [MatchController::class, 'searchByCountry']); // Search random user by country with 80% match
+    // Matching
+    Route::get('/similar-users', [MatchController::class, 'getSimilarUsers']);
+    Route::post('/search-by-country', [MatchController::class, 'searchByCountry']); // Search random user by country with 80% match
     Route::post('/advanced-search', [MatchController::class, 'advancedSearch']); // Advanced search with filters
 
     // Posts & Social
@@ -187,6 +190,7 @@ Route::middleware('auth:api')->group(function () {
     Route::prefix('calls')->group(function () {
         Route::post('/start', [\App\Http\Controllers\Api\CallController::class, 'startCall']); // Initiate call
         Route::post('/accept', [\App\Http\Controllers\Api\CallController::class, 'acceptCall']); // Accept call (get token)
+        Route::post('/confirm', [\App\Http\Controllers\Api\CallController::class, 'confirmCall']); // Confirm call (start)
         Route::post('/end', [\App\Http\Controllers\Api\CallController::class, 'endCall']); // End/Decline call
         Route::get('/history', [\App\Http\Controllers\Api\CallController::class, 'getHistory']); // Get call logs
     });
@@ -208,10 +212,9 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
     Route::delete('/hobbies/{id}', [HobbyController::class, 'destroy']); // Delete hobby
 });
 
-// ========== Fawaterak Payment Webhooks (Public - No Auth) ==========
-Route::prefix('fawaterak')->group(function () {
-    Route::post('/webhook', [FawaterakWebhookController::class, 'webhook']); // Payment webhook
-    Route::get('/callback', [FawaterakWebhookController::class, 'callback']); // Payment callback (redirect)
-    Route::post('/callback', [FawaterakWebhookController::class, 'callback']); // Payment callback (POST)
-    Route::get('/test-callback', [FawaterakWebhookController::class, 'testCallback']); // Test payment callback
+// ========== MyFatoorah Payment Webhooks (Public - No Auth) ==========
+Route::prefix('myfatoorah')->group(function () {
+    Route::post('/webhook', [MyFatoorahWebhookController::class, 'webhook']); // Payment webhook
+    Route::get('/callback', [MyFatoorahWebhookController::class, 'callback']); // Payment callback (redirect)
+    Route::post('/callback', [MyFatoorahWebhookController::class, 'callback']); // Payment callback (POST)
 });

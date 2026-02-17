@@ -227,11 +227,12 @@ class FriendshipController extends Controller
                 ->where('status', 'pending')
                 ->with('sender')
                 ->get()
-                ->map(function ($req) {
+                ->map(function ($req) use ($user) {
                     return [
                         'user_id' => $req->sender->id,
                         'name' => $req->sender->name,
                         'avatar' => $req->sender->profile_image ? url('storage/' . $req->sender->profile_image) : null,
+                        'friendship_status' => $user->getFriendshipStatus($req->sender->id),
                         'created_at' => $req->created_at->diffForHumans(),
                     ];
                 });
@@ -269,11 +270,12 @@ class FriendshipController extends Controller
                     return $req->sender_id == $user->id ? $req->receiver_id : $req->sender_id;
                 });
 
-            $friends = User::whereIn('id', $friendIds)->get()->map(function($friend) {
+            $friends = User::whereIn('id', $friendIds)->get()->map(function($friend) use ($user) {
                 return [
                     'id' => $friend->id,
                     'name' => $friend->name,
                     'avatar' => $friend->profile_image ? url('storage/' . $friend->profile_image) : null,
+                    'friendship_status' => $user->getFriendshipStatus($friend->id),
                 ];
             });
 
