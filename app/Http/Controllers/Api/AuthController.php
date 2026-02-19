@@ -137,6 +137,8 @@ class AuthController extends Controller
             'country_en'    => 'nullable|string|max:255',
             'gender'        => 'nullable|in:male,female',
             'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'latitude'      => 'nullable|numeric|between:-90,90',
+            'longitude'     => 'nullable|numeric|between:-180,180',
         ]);
 
         if ($validator->fails()) {
@@ -144,7 +146,7 @@ class AuthController extends Controller
         }
 
         $updateData = array_filter(
-            $request->only(['name', 'nickname', 'age', 'country_ar', 'country_en', 'gender']),
+            $request->only(['name', 'nickname', 'age', 'country_ar', 'country_en', 'gender', 'latitude', 'longitude']),
             fn($value) => !is_null($value)
         );
 
@@ -204,6 +206,8 @@ class AuthController extends Controller
                         ? url('uploads/' . $user->profile_image) 
                         : url('storage/' . $user->profile_image)))
                 : null,
+            'latitude'      => $user->latitude,
+            'longitude'     => $user->longitude,
             'hobbies'       => $user->hobbies()->get(['hobbies.id', 'hobbies.name']),
         ];
     }

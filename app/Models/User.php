@@ -44,6 +44,8 @@ class User extends Authenticatable implements FilamentUser, JWTSubject
         'wallet_balance',
         'gems',
         'fcm_token',
+        'latitude',
+        'longitude',
     ];
 
     /**

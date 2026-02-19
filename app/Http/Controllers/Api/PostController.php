@@ -54,8 +54,10 @@ class PostController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'content' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+            'content'   => 'nullable|string',
+            'image'     => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+            'latitude'  => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
         ]);
 
         // Ensure at least content or image is present
@@ -82,8 +84,10 @@ class PostController extends Controller
         }
 
         $post = $request->user()->posts()->create([
-            'content' => $request->content,
-            'image' => $imagePath,
+            'content'   => $request->content,
+            'image'     => $imagePath,
+            'latitude'  => $request->latitude,
+            'longitude' => $request->longitude,
         ]);
 
         return response()->json([
@@ -355,26 +359,33 @@ class PostController extends Controller
     private function formatPost($post)
     {
         $currentUser = auth('api')->user();
-        
-        \Log::info('formatPost called', [
-            'post_id' => $post->id,
-            'post_user_id' => $post->user->id,
-            'current_user' => $currentUser ? $currentUser->id : 'null'
-        ]);
-        
+
+        // Calculate distance between current user and the post's location
+        $distanceKm = null;
+        if ($currentUser && $currentUser->latitude && $currentUser->longitude 
+            && $post->latitude && $post->longitude) {
+            $distanceKm = $this->calculateDistance(
+                $currentUser->latitude, $currentUser->longitude,
+                $post->latitude, $post->longitude
+            );
+        }
+
         return [
-            'id' => $post->id,
-            'content' => $post->content,
-            'image' => $post->image ? asset($post->image) : null,
-            'likes_count' => $post->likes_count ?? $post->likes()->count(),
+            'id'             => $post->id,
+            'content'        => $post->content,
+            'image'          => $post->image ? asset($post->image) : null,
+            'latitude'       => $post->latitude,
+            'longitude'      => $post->longitude,
+            'likes_count'    => $post->likes_count ?? $post->likes()->count(),
             'comments_count' => $post->comments_count ?? $post->comments()->count(),
-            'created_at' => $post->created_at,
-            'updated_at' => $post->updated_at,
+            'created_at'     => $post->created_at,
+            'updated_at'     => $post->updated_at,
+            'distance_km'    => $distanceKm,
             'user' => [
-                'id' => $post->user->id,
-                'name' => $post->user->name,
-                'nickname' => $post->user->nickname,
-                'profile_image' => $post->user->profile_image ? asset(Storage::url($post->user->profile_image)) : null,
+                'id'               => $post->user->id,
+                'name'             => $post->user->name,
+                'nickname'         => $post->user->nickname,
+                'profile_image'    => $post->user->profile_image ? asset(Storage::url($post->user->profile_image)) : null,
                 'friendship_status' => !$currentUser 
                     ? 'not_friend'
                     : ($currentUser->id == $post->user->id 
@@ -383,13 +394,13 @@ class PostController extends Controller
             ],
             'comments' => $post->comments->map(function($comment) use ($currentUser) {
                 return [
-                    'id' => $comment->id,
-                    'content' => $comment->content,
+                    'id'         => $comment->id,
+                    'content'    => $comment->content,
                     'created_at' => $comment->created_at,
                     'user' => [
-                        'id' => $comment->user->id,
-                        'name' => $comment->user->name,
-                        'profile_image' => $comment->user->profile_image ? asset(Storage::url($comment->user->profile_image)) : null,
+                        'id'               => $comment->user->id,
+                        'name'             => $comment->user->name,
+                        'profile_image'    => $comment->user->profile_image ? asset(Storage::url($comment->user->profile_image)) : null,
                         'friendship_status' => !$currentUser 
                             ? 'not_friend'
                             : ($currentUser->id == $comment->user->id 
@@ -401,13 +412,34 @@ class PostController extends Controller
             'liked_by_current_user' => $currentUser ? $post->likes()->where('user_id', $currentUser->id)->exists() : false,
         ];
     }
-    
+
+    /**
+     * Calculate distance between two coordinates using Haversine formula
+     * Returns distance in kilometers, rounded to 2 decimal places
+     */
+    private function calculateDistance(float $lat1, float $lng1, float $lat2, float $lng2): float
+    {
+        $earthRadius = 6371; // km
+
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLng = deg2rad($lng2 - $lng1);
+
+        $a = sin($dLat / 2) * sin($dLat / 2)
+           + cos(deg2rad($lat1)) * cos(deg2rad($lat2))
+           * sin($dLng / 2) * sin($dLng / 2);
+
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+        return round($earthRadius * $c, 2);
+    }
+
     private function formatPosts($posts)
     {
         $formatted = [];
         foreach($posts as $post) {
             $formatted[] = $this->formatPost($post);
         }
+
         return $formatted;
     }
 }
