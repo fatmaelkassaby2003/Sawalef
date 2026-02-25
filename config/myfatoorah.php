@@ -15,9 +15,9 @@ return [
     'test_mode' => env('MYFATOORAH_TEST_MODE', true),
     
     // Redirect URLs
-    'success_url' => env('MYFATOORAH_SUCCESS_URL', env('APP_URL') . '/api/payment/myfatoorah/callback?status=success'),
-    'failure_url' => env('MYFATOORAH_FAILURE_URL', env('APP_URL') . '/api/payment/myfatoorah/callback?status=fail'),
+    'success_url' => env('MYFATOORAH_SUCCESS_URL', env('APP_URL') . '/api/myfatoorah/callback?status=success'),
+    'failure_url' => env('MYFATOORAH_FAILURE_URL', env('APP_URL') . '/api/myfatoorah/callback?status=fail'),
     
     // Webhook URL
-    'webhook_url' => env('MYFATOORAH_WEBHOOK_URL', env('APP_URL') . '/api/payment/myfatoorah/webhook'),
+    'webhook_url' => env('MYFATOORAH_WEBHOOK_URL', env('APP_URL') . '/api/myfatoorah/webhook'),
 ];

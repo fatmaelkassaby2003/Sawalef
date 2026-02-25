@@ -1,0 +1,160 @@
+{
+    "info": {
+        "_postman_id": "85b37e27-322b-43c1-b258-3dab0ce6cbcd",
+        "name": "Sawalef Payments (MyFatoorah & Manual)",
+        "description": "Collection for testing MyFatoorah integration and Manual Bank Transfer endpoints.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "1. Get Available Payment Methods",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/wallet/payment-methods?amount=100",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "wallet",
+                        "payment-methods"
+                    ],
+                    "query": [
+                        {
+                            "key": "amount",
+                            "value": "100",
+                            "description": "Optional amount to check available methods for."
+                        }
+                    ]
+                },
+                "description": "Fetches real payment methods from MyFatoorah API + the Manual Bank Transfer option (ID: 999)."
+            },
+            "response": []
+        },
+        {
+            "name": "2. Initiate Deposit (MyFatoorah)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"amount\": 100,\n    \"payment_method_id\": 2\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/wallet/deposit",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "wallet",
+                        "deposit"
+                    ]
+                },
+                "description": "Initiate a charge using a MyFatoorah gateway ID (like 2 for Vodafone Cash). Returns a payment_url."
+            },
+            "response": []
+        },
+        {
+            "name": "3. Initiate Deposit (Manual Bank Transfer)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"amount\": 500,\n    \"payment_method_id\": 999,\n    \"bank_name\": \"Bank Misr / Wallet Number\",\n    \"transaction_id\": \"TXN-100200300\"\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/wallet/deposit",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "wallet",
+                        "deposit"
+                    ]
+                },
+                "description": "Initiate a manual bank transfer request. Uses static ID 999."
+            },
+            "response": []
+        }
+    ],
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{token}}",
+                "type": "string"
+            }
+        ]
+    },
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    ""
+                ]
+            }
+        },
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    ""
+                ]
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "https://sawalef.ahdafweb.com",
+            "type": "string"
+        },
+        {
+            "key": "token",
+            "value": "INSERT_TOKEN_HERE",
+            "type": "string"
+        }
+    ]
+}

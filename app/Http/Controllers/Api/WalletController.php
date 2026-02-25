@@ -77,12 +77,37 @@ class WalletController extends Controller
     /**
      * Get available payment methods
      */
-    public function paymentMethods()
+    /**
+     * Get available payment methods
+     */
+    public function paymentMethods(Request $request)
     {
+        $amount = $request->query('amount', 10);
+        $result = $this->myFatoorahService->initiatePayment($amount);
+
+        $methods = [];
+        if ($result['success']) {
+            $methods = $result['data'];
+        } else {
+            // Fallback to static methods if API fails
+            $methods = $this->getStaticPaymentMethods();
+        }
+
+        // Add Manual Bank Transfer Option
+        $methods[] = [
+            'PaymentMethodId' => 999,
+            'PaymentMethodAr' => 'تحويل بنكي يدوي',
+            'PaymentMethodEn' => 'Manual Bank Transfer',
+            'IsDirectPayment' => true,
+            'ServiceCharge' => 0,
+            'TotalAmount' => $amount,
+            'ImageUrl' => asset('assets/icons/bank-transfer.png'),
+        ];
+
         return response()->json([
             'status' => true,
             'message' => 'تم جلب طرق الدفع بنجاح',
-            'data' => $this->getStaticPaymentMethods(),
+            'data' => $methods,
         ], 200);
     }
 
@@ -93,7 +118,9 @@ class WalletController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'amount' => 'required|numeric|min:10',
-            'payment_method_id' => 'nullable|integer', 
+            'payment_method_id' => 'required|integer', 
+            'bank_name' => 'required_if:payment_method_id,999|string|max:255',
+            'transaction_id' => 'required_if:payment_method_id,999|string|max:255',
         ]);
 
         if ($validator->fails()) {
@@ -107,53 +134,83 @@ class WalletController extends Controller
         try {
             $user = $request->user();
             $amount = $request->amount;
+            $paymentMethodId = $request->payment_method_id;
 
             DB::beginTransaction();
 
-            // Create pending transaction
+            $notes = null;
+            $status = 'pending';
+            $paymentMethodName = 'MyFatoorah';
+
+            if ($paymentMethodId == 999) {
+                // Manual Bank Transfer
+                $status = 'pending';
+                $paymentMethodName = 'Manual Bank Transfer';
+                $notes = "Bank: {$request->bank_name}, Transaction ID: {$request->transaction_id}";
+            }
+
+            // Create transaction
             $transaction = WalletTransaction::create([
                 'user_id' => $user->id,
                 'type' => 'deposit',
                 'amount' => $amount,
                 'balance_before' => $user->wallet_balance,
-                'balance_after' => $user->wallet_balance, // Will be updated after payment
-                'status' => 'pending',
-                'payment_method' => $this->getPaymentMethodName($request->payment_method_id),
+                'balance_after' => $user->wallet_balance, 
+                'status' => $status,
+                'payment_method' => $paymentMethodName,
                 'reference_number' => WalletTransaction::generateReferenceNumber(),
+                'notes' => $notes,
             ]);
 
-            // 🧪 MYFATOORAH INTEGRATION
-            $paymentResult = $this->myFatoorahService->sendPayment([
-                'amount' => $amount,
-                'customer_name' => $user->name,
-                'customer_email' => $user->email ?? $user->phone . '@sawalef.com',
-                'customer_phone' => $user->phone,
-                'reference_number' => $transaction->reference_number,
-            ]);
+            if ($paymentMethodId != 999) {
+                // MYFATOORAH EXECUTE PAYMENT
+                $paymentResult = $this->myFatoorahService->executePayment([
+                    'payment_method_id' => $paymentMethodId,
+                    'amount' => $amount,
+                    'customer_name' => $user->name,
+                    'customer_email' => $user->email ?? $user->phone . '@sawalef.com',
+                    'customer_phone' => $user->phone,
+                    'reference_number' => $transaction->reference_number,
+                ]);
 
-            if (!$paymentResult['success']) {
-                DB::rollBack();
+                if (!$paymentResult['success']) {
+                    DB::rollBack();
+                    return response()->json([
+                        'status' => false,
+                        'message' => $paymentResult['message'] ?? 'فشل في تنفيذ عملية الدفع',
+                        'error_details' => $paymentResult['error'] ?? null
+                    ], 500);
+                }
+
+                // Update transaction with invoice ID
+                $transaction->update([
+                    'gateway_invoice_id' => $paymentResult['invoice_id'] ?? null,
+                ]);
+
+                DB::commit();
+
                 return response()->json([
-                    'status' => false,
-                    'message' => $paymentResult['message'] ?? 'فشل في إنشاء عملية الدفع'
-                ], 500);
+                    'status' => true,
+                    'message' => 'تم إنشاء عملية الدفع بنجاح',
+                    'data' => [
+                        'transaction_id' => $transaction->id,
+                        'reference_number' => $transaction->reference_number,
+                        'payment_url' => $paymentResult['payment_url'],
+                        'invoice_id' => $paymentResult['invoice_id'],
+                    ]
+                ], 200);
             }
 
-            // Update transaction with invoice ID
-            $transaction->update([
-                'gateway_invoice_id' => $paymentResult['invoice_id'] ?? null,
-            ]);
-
+            // For Manual Transfer
             DB::commit();
 
             return response()->json([
                 'status' => true,
-                'message' => 'تم إنشاء عملية الدفع بنجاح',
+                'message' => 'تم تسجيل طلب الشحن اليدوي بنجاح. سيتم المراجعة من قبل الإدارة.',
                 'data' => [
                     'transaction_id' => $transaction->id,
                     'reference_number' => $transaction->reference_number,
-                    'payment_url' => $paymentResult['payment_url'],
-                    'invoice_id' => $paymentResult['invoice_id'],
+                    'status' => 'pending'
                 ]
             ], 200);
 
@@ -161,7 +218,7 @@ class WalletController extends Controller
             DB::rollBack();
             return response()->json([
                 'status' => false,
-                'message' => 'حدث خطأ أثناء إنشاء عملية الدفع',
+                'message' => 'حدث خطأ أثناء معالجة الطلب',
                 'error' => $e->getMessage()
             ], 500);
         }
