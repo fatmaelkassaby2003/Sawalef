@@ -50,15 +50,70 @@ class MyFatoorahWebhookController extends Controller
 
                 if ($invoiceStatus === 'Paid') {
                     $this->handleSuccessfulPayment($transaction, $paymentId);
-                    return redirect(env('FRONTEND_URL', 'https://sawalef.com') . '/payment/success?reference=' . $referenceNumber);
+                    $newBalance = $transaction->user->wallet_balance;
+                    
+                    return response("
+                        <!DOCTYPE html>
+                        <html lang='ar' dir='rtl'>
+                        <head>
+                            <meta charset='UTF-8'>
+                            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                            <title>تم الدفع بنجاح</title>
+                            <link href='https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap' rel='stylesheet'>
+                            <style>
+                                body { font-family: 'Cairo', sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+                                .card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; max-width: 400px; width: 90%; }
+                                .icon { font-size: 60px; color: #4CAF50; margin-bottom: 20px; }
+                                h1 { color: #333; margin-bottom: 10px; }
+                                p { color: #666; font-size: 18px; margin-bottom: 30px; }
+                                .balance-box { background: #e8f5e9; padding: 20px; border-radius: 12px; margin-bottom: 30px; }
+                                .balance-label { font-size: 14px; color: #4CAF50; display: block; }
+                                .balance-amount { font-size: 32px; font-weight: bold; color: #2e7d32; }
+                                .ref { font-size: 12px; color: #aaa; }
+                            </style>
+                        </head>
+                        <body>
+                            <div class='card'>
+                                <div class='icon'>✅</div>
+                                <h1>تم الشحن بنجاح!</h1>
+                                <p>شكراً لك، تم إضافة المبلغ لمحفظتك فوراً.</p>
+                                <div class='balance-box'>
+                                    <span class='balance-label'>رصيدك الحالي</span>
+                                    <span class='balance-amount'>{$newBalance} ج.م</span>
+                                </div>
+                                <div class='ref'>رقم العملية: {$referenceNumber}</div>
+                            </div>
+                        </body>
+                        </html>
+                    ");
                 }
             }
 
-            return redirect(env('FRONTEND_URL', 'https://sawalef.com') . '/payment/failed?error=payment_failed');
+            return response("
+                <!DOCTYPE html>
+                <html lang='ar' dir='rtl'>
+                <head>
+                    <meta charset='UTF-8'>
+                    <title>خطأ في الدفع</title>
+                    <style>
+                        body { font-family: sans-serif; background: #fff5f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+                        .card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center; }
+                        .icon { font-size: 60px; color: #f44336; }
+                    </style>
+                </head>
+                <body>
+                    <div class='card'>
+                        <div class='icon'>❌</div>
+                        <h1>فشل الدفع</h1>
+                        <p>نعتذر، لم نتمكن من إتمام العملية.</p>
+                    </div>
+                </body>
+                </html>
+            ", 400);
 
         } catch (\Exception $e) {
             Log::error('MyFatoorah Callback Error', ['message' => $e->getMessage()]);
-            return redirect(env('FRONTEND_URL', 'https://sawalef.com') . '/payment/failed?error=system_error');
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 

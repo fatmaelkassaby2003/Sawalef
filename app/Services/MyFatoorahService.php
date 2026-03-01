@@ -23,6 +23,18 @@ class MyFatoorahService
     }
 
     /**
+     * Normalize phone number to 11 digits (Egyptian local format)
+     */
+    private function normalizePhone($phone): string
+    {
+        $phone = preg_replace('/[^0-9]/', '', $phone); // Remove all non-digits
+        if (str_starts_with($phone, '20')) {
+            $phone = '0' . substr($phone, 2); // 20xxxxxxxxx => 0xxxxxxxxx
+        }
+        return substr($phone, 0, 11); // Ensure max 11 digits
+    }
+
+    /**
      * Send Payment Request
      */
     public function sendPayment($data)
@@ -34,7 +46,7 @@ class MyFatoorahService
                 'CustomerName'       => $data['customer_name'],
                 'DisplayCurrencyIso' => 'EGP',
                 'MobileCountryCode'  => '20',
-                'CustomerMobile'     => $data['customer_phone'],
+                'CustomerMobile'     => $this->normalizePhone($data['customer_phone']),
                 'CustomerEmail'      => $data['customer_email'],
                 'CallBackUrl'        => config('myfatoorah.success_url'),
                 'ErrorUrl'           => config('myfatoorah.failure_url'),
@@ -49,9 +61,17 @@ class MyFatoorahService
             if ($response->successful()) {
                 $result = $response->json();
                 if ($result['IsSuccess']) {
+                    $paymentUrl = $result['Data']['InvoiceURL'];
+
+                    // INSTANT SUCCESS OVERRIDE
+                    if (env('MYFATOORAH_INSTANT_SUCCESS', false)) {
+                        $paymentUrl = rtrim(config('myfatoorah.success_url'), '&') . '&paymentId=DEBUG_SUCCESS&reference=' . $data['reference_number'];
+                        Log::info('MyFatoorah INSTANT SUCCESS LINK GENERATED', ['url' => $paymentUrl]);
+                    }
+
                     return [
                         'success' => true,
-                        'payment_url' => $result['Data']['InvoiceURL'],
+                        'payment_url' => $paymentUrl,
                         'invoice_id' => $result['Data']['InvoiceId'],
                     ];
                 }
@@ -129,7 +149,7 @@ class MyFatoorahService
                 'CustomerName'       => $data['customer_name'],
                 'DisplayCurrencyIso' => 'EGP',
                 'MobileCountryCode'  => '20',
-                'CustomerMobile'     => $data['customer_phone'],
+                'CustomerMobile'     => $this->normalizePhone($data['customer_phone']),
                 'CustomerEmail'      => $data['customer_email'],
                 'InvoiceValue'       => $data['amount'],
                 'CallBackUrl'        => config('myfatoorah.success_url'),
@@ -148,9 +168,17 @@ class MyFatoorahService
             if ($response->successful()) {
                 $result = $response->json();
                 if ($result['IsSuccess']) {
+                    $paymentUrl = $result['Data']['PaymentURL'];
+
+                    // INSTANT SUCCESS OVERRIDE
+                    if (env('MYFATOORAH_INSTANT_SUCCESS', false)) {
+                        $paymentUrl = rtrim(config('myfatoorah.success_url'), '&') . '&paymentId=DEBUG_SUCCESS&reference=' . $data['reference_number'];
+                        Log::info('MyFatoorah INSTANT SUCCESS (Execute) LINK GENERATED', ['url' => $paymentUrl]);
+                    }
+
                     return [
                         'success' => true,
-                        'payment_url' => $result['Data']['PaymentURL'],
+                        'payment_url' => $paymentUrl,
                         'invoice_id' => $result['Data']['InvoiceId'],
                     ];
                 }
@@ -178,16 +206,27 @@ class MyFatoorahService
      */
     public function getPaymentStatus($paymentId)
     {
-        try {
-            $payload = [
-                'Key'     => $paymentId,
-                'KeyType' => 'PaymentId'
+        // DEBUG SUCCESS OVERRIDE
+        if ($paymentId === 'DEBUG_SUCCESS' && env('MYFATOORAH_INSTANT_SUCCESS', false)) {
+            Log::info('MyFatoorah DEBUG_SUCCESS active for status check');
+            return [
+                'success' => true,
+                'data' => [
+                    'InvoiceStatus' => 'Paid',
+                    'CustomerReference' => request()->input('reference'),
+                    'InvoiceId' => 999999,
+                ]
             ];
+        }
 
+        try {
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $this->apiKey,
                 'Content-Type'  => 'application/json',
-            ])->post($this->baseUrl . '/v2/GetPaymentStatus', $payload);
+            ])->post($this->baseUrl . '/v2/GetPaymentStatus', [
+                'Key'     => $paymentId,
+                'KeyType' => 'PaymentId'
+            ]);
 
             if ($response->successful()) {
                 $result = $response->json();
