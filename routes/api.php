@@ -6,7 +6,7 @@ use App\Http\Controllers\Api\MatchController;
 use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\PackageController;
 use App\Http\Controllers\Api\WalletController;
-use App\Http\Controllers\Api\MyFatoorahWebhookController;
+use App\Http\Controllers\Api\MoyasarWebhookController;
 use App\Http\Controllers\Api\StaticPageController;
 use App\Http\Controllers\Api\SupportController;
 use App\Http\Controllers\Api\AdvertisementController;
@@ -212,9 +212,8 @@ Route::middleware('auth:api')->prefix('admin')->group(function () {
     Route::delete('/hobbies/{id}', [HobbyController::class, 'destroy']); // Delete hobby
 });
 
-// ========== MyFatoorah Payment Webhooks (Public - No Auth) ==========
-Route::prefix('myfatoorah')->group(function () {
-    Route::post('/webhook', [MyFatoorahWebhookController::class, 'webhook']); // Payment webhook
-    Route::get('/callback', [MyFatoorahWebhookController::class, 'callback']); // Payment callback (redirect)
-    Route::post('/callback', [MyFatoorahWebhookController::class, 'callback']); // Payment callback (POST)
+// ========== Moyasar Payment Webhooks (Public - No Auth) ==========
+Route::prefix('moyasar')->group(function () {
+    Route::post('/webhook', [MoyasarWebhookController::class, 'webhook']); // Payment webhook
+    Route::get('/callback', [MoyasarWebhookController::class, 'callback']); // Payment callback (redirect)
 });

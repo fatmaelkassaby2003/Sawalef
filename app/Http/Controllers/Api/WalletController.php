@@ -7,18 +7,18 @@ use App\Models\User;
 use App\Models\WalletTransaction;
 use App\Models\Package;
 use App\Models\PackagePurchase;
-use App\Services\MyFatoorahService;
+use App\Services\MoyasarService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class WalletController extends Controller
 {
-    protected $myFatoorahService;
+    protected $moyasarService;
 
-    public function __construct(MyFatoorahService $myFatoorahService)
+    public function __construct(MoyasarService $moyasarService)
     {
-        $this->myFatoorahService = $myFatoorahService;
+        $this->moyasarService = $moyasarService;
     }
 
     /**
@@ -83,15 +83,32 @@ class WalletController extends Controller
     public function paymentMethods(Request $request)
     {
         $amount = $request->query('amount', 10);
-        $result = $this->myFatoorahService->initiatePayment($amount);
-
-        $methods = [];
-        if ($result['success']) {
-            $methods = $result['data'];
-        } else {
-            // Fallback to static methods if API fails
-            $methods = $this->getStaticPaymentMethods();
-        }
+        
+        // Moyasar supports Mada, Visa, Mastercard, and Apple Pay
+        // We can return them statically since Moyasar doesn't have an "initiate" like MyFatoorah
+        $methods = [
+            [
+                'PaymentMethodId' => 1,
+                'PaymentMethodAr' => 'مدى (Mada)',
+                'PaymentMethodEn' => 'Mada',
+                'IsDirectPayment' => true,
+                'ImageUrl' => 'https://moyasar.com/assets/mada-6007a9602.png',
+            ],
+            [
+                'PaymentMethodId' => 2,
+                'PaymentMethodAr' => 'بطاقة ائتمان (Visa/Mastercard)',
+                'PaymentMethodEn' => 'Credit Card',
+                'IsDirectPayment' => true,
+                'ImageUrl' => 'https://moyasar.com/assets/visa-06480e60.png',
+            ],
+            [
+                'PaymentMethodId' => 3,
+                'PaymentMethodAr' => 'Apple Pay',
+                'PaymentMethodEn' => 'Apple Pay',
+                'IsDirectPayment' => true,
+                'ImageUrl' => 'https://moyasar.com/assets/apple-pay-35b9b7e0.png',
+            ],
+        ];
 
         // Add Manual Bank Transfer Option
         $methods[] = [
@@ -100,7 +117,7 @@ class WalletController extends Controller
             'PaymentMethodEn' => 'Manual Bank Transfer',
             'IsDirectPayment' => true,
             'ServiceCharge' => 0,
-            'TotalAmount' => $amount,
+            'TotalAmount' => (float)$amount,
             'ImageUrl' => asset('assets/icons/bank-transfer.png'),
         ];
 
@@ -140,7 +157,7 @@ class WalletController extends Controller
 
             $notes = null;
             $status = 'pending';
-            $paymentMethodName = 'MyFatoorah';
+            $paymentMethodName = 'Moyasar';
 
             if ($paymentMethodId == 999) {
                 // Manual Bank Transfer
@@ -163,10 +180,10 @@ class WalletController extends Controller
             ]);
 
             if ($paymentMethodId != 999) {
-                // MYFATOORAH EXECUTE PAYMENT
-                $paymentResult = $this->myFatoorahService->executePayment([
-                    'payment_method_id' => $paymentMethodId,
+                // MOYASAR EXECUTE PAYMENT
+                $paymentResult = $this->moyasarService->createInvoice([
                     'amount' => $amount,
+                    'currency' => 'SAR', // Moyasar is primarily SAR
                     'customer_name' => $user->name,
                     'customer_email' => $user->email ?? $user->phone . '@sawalef.com',
                     'customer_phone' => $user->phone,
@@ -177,12 +194,12 @@ class WalletController extends Controller
                     DB::rollBack();
                     return response()->json([
                         'status' => false,
-                        'message' => $paymentResult['message'] ?? 'فشل في تنفيذ عملية الدفع',
+                        'message' => $paymentResult['message'] ?? 'فشل في إنشاء فاتورة الدفع',
                         'error_details' => $paymentResult['error'] ?? null
                     ], 500);
                 }
 
-                // Update transaction with invoice ID
+                // Update transaction with gateway ID
                 $transaction->update([
                     'gateway_invoice_id' => $paymentResult['invoice_id'] ?? null,
                 ]);
