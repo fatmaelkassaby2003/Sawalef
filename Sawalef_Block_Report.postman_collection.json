@@ -1,0 +1,154 @@
+{
+    "info": {
+        "_postman_id": "b2c3d4e5-f6a7-4b5c-8d9e-0f1a2b3c4d5e",
+        "name": "Sawalef Block & Report",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Block",
+            "item": [
+                {
+                    "name": "Block User",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/blocks/2",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "blocks",
+                                "2"
+                            ]
+                        },
+                        "description": "حظر مستخدم (غيّر 2 بـ ID المستخدم المراد حظره)\n\nResponse 200: {success: true, message: 'تم حظر المستخدم بنجاح'}\nResponse 409: مستخدم محظور بالفعل\nResponse 404: مستخدم غير موجود"
+                    }
+                },
+                {
+                    "name": "Get Blocked Users List",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/blocks",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "blocks"
+                            ]
+                        },
+                        "description": "قائمة المستخدمين المحظورين\n\nResponse 200: {success: true, blocked_users: [...], total: N}"
+                    }
+                },
+                {
+                    "name": "Unblock User",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/blocks/2",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "blocks",
+                                "2"
+                            ]
+                        },
+                        "description": "رفع الحظر عن مستخدم (غيّر 2 بـ ID المستخدم)\n\nResponse 200: {success: true, message: 'تم رفع الحظر بنجاح'}\nResponse 404: المستخدم غير محظور"
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Report Post",
+            "item": [
+                {
+                    "name": "Report Post",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"reason\": \"محتوى مسيء\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/posts/1/report",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "posts",
+                                "1",
+                                "report"
+                            ]
+                        },
+                        "description": "بلاغ على بوست (غيّر 1 بـ ID البوست)\n\nالـ reason اختياري\n\nResponse 200: {success: true, message: 'تم إرسال البلاغ بنجاح، سيتم مراجعته'}\nResponse 409: تم الإبلاغ من قبل\nResponse 400: لا يمكنك الإبلاغ عن بوستك"
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "https://your-domain.com"
+        },
+        {
+            "key": "token",
+            "value": "YOUR_JWT_TOKEN_HERE"
+        }
+    ]
+}

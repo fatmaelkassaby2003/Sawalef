@@ -44,6 +44,14 @@ class CallController extends Controller
                 ], 403);
             }
 
+            // 2. Check block
+            if ($sender->hasBlockWith($receiverId)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'لا يمكنك الاتصال بهذا المستخدم'
+                ], 403);
+            }
+
             // 2. Generate a unique channel name for this pair
             $channelName = 'call_' . min($sender->id, $receiverId) . '_' . max($sender->id, $receiverId);
 

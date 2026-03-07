@@ -94,6 +94,14 @@ class ChatController extends Controller
                 ], 403);
             }
 
+            // CHECK BLOCK
+            if ($currentUser->hasBlockWith($otherUserId)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'لا يمكنك بدء محادثة مع هذا المستخدم'
+                ], 403);
+            }
+
             $conversation = Conversation::findOrCreateBetween($currentUser->id, $otherUserId);
 
             return response()->json([
@@ -214,6 +222,14 @@ class ChatController extends Controller
                 return response()->json([
                     'status' => false,
                     'message' => 'يمكنك إرسال الرسائل للأصدقاء فقط'
+                ], 403);
+            }
+
+            // CHECK BLOCK
+            if ($user->hasBlockWith($otherUserId)) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'لا يمكنك إرسال رسائل لهذا المستخدم'
                 ], 403);
             }
 

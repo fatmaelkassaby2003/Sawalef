@@ -8,6 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use App\Models\FriendRequest;
+use App\Models\Block;
 
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
@@ -110,6 +111,50 @@ class User extends Authenticatable implements FilamentUser, JWTSubject
     public function supportTickets()
     {
         return $this->hasMany(SupportTicket::class);
+    }
+
+    /**
+     * Users that this user has blocked.
+     */
+    public function blockedUsers()
+    {
+        return $this->hasMany(Block::class, 'blocker_id');
+    }
+
+    /**
+     * Users that have blocked this user.
+     */
+    public function blockedByUsers()
+    {
+        return $this->hasMany(Block::class, 'blocked_id');
+    }
+
+    /**
+     * Check if this user has blocked the given userId.
+     */
+    public function isBlocking($userId): bool
+    {
+        return Block::where('blocker_id', $this->id)
+            ->where('blocked_id', $userId)
+            ->exists();
+    }
+
+    /**
+     * Check if this user is blocked by the given userId.
+     */
+    public function isBlockedBy($userId): bool
+    {
+        return Block::where('blocker_id', $userId)
+            ->where('blocked_id', $this->id)
+            ->exists();
+    }
+
+    /**
+     * Check if there is any block relationship between this user and the given userId (in either direction).
+     */
+    public function hasBlockWith($userId): bool
+    {
+        return $this->isBlocking($userId) || $this->isBlockedBy($userId);
     }
 
     /**

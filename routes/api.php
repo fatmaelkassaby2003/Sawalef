@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\MoyasarWebhookController;
 use App\Http\Controllers\Api\StaticPageController;
 use App\Http\Controllers\Api\SupportController;
 use App\Http\Controllers\Api\AdvertisementController;
+use App\Http\Controllers\Api\BlockController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -202,6 +203,16 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/conversations/{conversationId}/messages', [\App\Http\Controllers\Api\ChatController::class, 'getMessages']); // Get messages
         Route::post('/conversations/{conversationId}/messages', [\App\Http\Controllers\Api\ChatController::class, 'sendMessage']); // Send message (text or image)
     });
+
+    // ========== Block Routes ==========
+    Route::prefix('blocks')->group(function () {
+        Route::get('/', [BlockController::class, 'index']);           // قائمة المحظورين
+        Route::post('/{userId}', [BlockController::class, 'block']);   // حظر مستخدم
+        Route::delete('/{userId}', [BlockController::class, 'unblock']); // رفع الحظر
+    });
+
+    // ========== Report Post ==========
+    Route::post('/posts/{id}/report', [PostController::class, 'report']); // بلاغ على بوست
 });
 
 

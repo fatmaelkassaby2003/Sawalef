@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Post;
 use App\Models\User;
 use App\Models\Comment;
+use App\Models\PostReport;
+use App\Models\Block;
 use App\Services\FCMService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -26,6 +28,16 @@ class PostController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        $user = auth('api')->user();
+
+        // Collect IDs to exclude: users this user blocked + users who blocked this user
+        $blockedIds = [];
+        if ($user) {
+            $blockedByMe = Block::where('blocker_id', $user->id)->pluck('blocked_id')->toArray();
+            $blockedMe   = Block::where('blocked_id', $user->id)->pluck('blocker_id')->toArray();
+            $blockedIds  = array_unique(array_merge($blockedByMe, $blockedMe));
+        }
+
         // Two-tier sorting:
         // 1. Posts with likes come first
         // 2. Within each group, sort by most recent activity (like time or creation time)
@@ -33,6 +45,7 @@ class PostController extends Controller
             ->selectRaw('posts.*, (SELECT MAX(created_at) FROM likes WHERE likes.post_id = posts.id) as last_liked_at')
             ->with(['user:id,name,nickname,profile_image', 'likes', 'comments.user:id,name,nickname,profile_image'])
             ->withCount('likes', 'comments')
+            ->when(!empty($blockedIds), fn($q) => $q->whereNotIn('user_id', $blockedIds))
             ->orderByRaw('CASE WHEN (SELECT MAX(created_at) FROM likes WHERE likes.post_id = posts.id) IS NOT NULL THEN 0 ELSE 1 END')
             ->orderByRaw('COALESCE(last_liked_at, posts.created_at) DESC')
             ->paginate(10);
@@ -353,6 +366,44 @@ class PostController extends Controller
                 'hobbies' => $formattedHobbies,
                 'posts' => $formattedPosts,
             ]
+        ]);
+    }
+
+    /**
+     * Report a post
+     */
+    public function report(Request $request, $id): JsonResponse
+    {
+        $post = Post::find($id);
+
+        if (!$post) {
+            return response()->json(['success' => false, 'message' => 'البوست غير موجود'], 404);
+        }
+
+        $user = $request->user();
+
+        if ($post->user_id === $user->id) {
+            return response()->json(['success' => false, 'message' => 'لا يمكنك الإبلاغ عن بوستك'], 400);
+        }
+
+        // Check already reported
+        $alreadyReported = PostReport::where('reporter_id', $user->id)
+            ->where('post_id', $id)
+            ->exists();
+
+        if ($alreadyReported) {
+            return response()->json(['success' => false, 'message' => 'لقد أبلغت عن هذا البوست من قبل'], 409);
+        }
+
+        PostReport::create([
+            'reporter_id' => $user->id,
+            'post_id'     => $id,
+            'reason'      => $request->reason,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم إرسال البلاغ بنجاح، سيتم مراجعته',
         ]);
     }
 
