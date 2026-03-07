@@ -2,6 +2,8 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\Block;
+use App\Models\PostReport;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
@@ -17,15 +19,28 @@ class StatsOverview extends BaseWidget
                 ->descriptionIcon('heroicon-m-users')
                 ->chart([7, 2, 10, 3, 15, 4, 17])
                 ->color('success'),
+
             Stat::make('المنشورات', \App\Models\Post::count())
                 ->description('إجمالي المنشورات')
                 ->descriptionIcon('heroicon-m-pencil-square')
                 ->chart([15, 3, 12, 5, 20, 8, 25])
                 ->color('warning'),
+
             Stat::make('الهوايات', \App\Models\Hobby::count())
                 ->description('الهوايات المتاحة')
                 ->descriptionIcon('heroicon-m-heart')
                 ->color('primary'),
+
+            Stat::make('قائمة الحظر', Block::count())
+                ->description('إجمالي علاقات الحظر بين المستخدمين')
+                ->descriptionIcon('heroicon-m-no-symbol')
+                ->color('danger'),
+
+            Stat::make('البلاغات', PostReport::count())
+                ->description('بلاغات تنتظر المراجعة')
+                ->descriptionIcon('heroicon-m-flag')
+                ->color('gray'),
         ];
     }
 }
+
