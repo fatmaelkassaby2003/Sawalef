@@ -407,6 +407,111 @@ class PostController extends Controller
         ]);
     }
 
+    /**
+     * Get current user's reports
+     */
+    public function myReports(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        $reports = PostReport::where('reporter_id', $user->id)
+            ->with(['post' => function ($q) {
+                $q->with('user:id,name,nickname,profile_image');
+            }])
+            ->latest()
+            ->get()
+            ->map(function ($report) {
+                $post = $report->post;
+                return [
+                    'report_id'  => $report->id,
+                    'reason'     => $report->reason,
+                    'created_at' => $report->created_at,
+                    'post'       => $post ? [
+                        'id'      => $post->id,
+                        'content' => $post->content,
+                        'image'   => $post->image ? asset($post->image) : null,
+                        'user'    => $post->user ? [
+                            'id'            => $post->user->id,
+                            'name'          => $post->user->name,
+                            'profile_image' => $post->user->profile_image
+                                ? asset(\Illuminate\Support\Facades\Storage::url($post->user->profile_image))
+                                : null,
+                        ] : null,
+                    ] : null,
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'reports' => $reports,
+            'total'   => $reports->count(),
+        ]);
+    }
+
+    /**
+     * Update (edit reason of) a report
+     */
+    public function updateReport(Request $request, $reportId): JsonResponse
+    {
+        $user   = $request->user();
+        $report = PostReport::where('id', $reportId)
+            ->where('reporter_id', $user->id)
+            ->first();
+
+        if (!$report) {
+            return response()->json([
+                'success' => false,
+                'message' => 'البلاغ غير موجود أو لا تملك صلاحية تعديله',
+            ], 404);
+        }
+
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'reason' => 'required|string|max:500',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'بيانات غير صحيحة',
+                'errors'  => $validator->errors(),
+            ], 422);
+        }
+
+        $report->update(['reason' => $request->reason]);
+
+        return response()->json([
+            'success'   => true,
+            'message'   => 'تم تعديل البلاغ بنجاح',
+            'report_id' => $report->id,
+            'reason'    => $report->reason,
+        ]);
+    }
+
+    /**
+     * Delete (withdraw) a report
+     */
+    public function deleteReport(Request $request, $reportId): JsonResponse
+    {
+        $user   = $request->user();
+        $report = PostReport::where('id', $reportId)
+            ->where('reporter_id', $user->id)
+            ->first();
+
+        if (!$report) {
+            return response()->json([
+                'success' => false,
+                'message' => 'البلاغ غير موجود أو لا تملك صلاحية حذفه',
+            ], 404);
+        }
+
+        $report->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم حذف البلاغ بنجاح',
+        ]);
+    }
+
     private function formatPost($post)
     {
         $currentUser = auth('api')->user();

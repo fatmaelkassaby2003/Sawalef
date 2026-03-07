@@ -135,7 +135,103 @@
                                 "report"
                             ]
                         },
-                        "description": "بلاغ على بوست (غيّر 1 بـ ID البوست)\n\nالـ reason اختياري\n\nResponse 200: {success: true, message: 'تم إرسال البلاغ بنجاح، سيتم مراجعته'}\nResponse 409: تم الإبلاغ من قبل\nResponse 400: لا يمكنك الإبلاغ عن بوستك"
+                        "description": "بلاغ على بوست (غيّر 1 بـ ID البوست)\n\nالـ reason اختياري\n\nResponse 200: تم إرسال البلاغ\nResponse 409: تم الإبلاغ من قبل\nResponse 400: لا يمكنك الإبلاغ عن بوستك"
+                    }
+                },
+                {
+                    "name": "My Reports List",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/my-reports",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "my-reports"
+                            ]
+                        },
+                        "description": "قائمة بلاغاتي\n\nResponse 200: {success: true, reports: [{report_id, reason, created_at, post: {id, content, image, user}}], total: N}"
+                    }
+                },
+                {
+                    "name": "Update Report (Edit Reason)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"reason\": \"محتوى يحتوي على عنف\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/reports/1",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "reports",
+                                "1"
+                            ]
+                        },
+                        "description": "تعديل سبب البلاغ (غيّر 1 بـ report_id)\n\nيجب أن يكون البلاغ خاصاً بك\nالـ reason مطلوب\n\nResponse 200: {success: true, message: 'تم تعديل البلاغ بنجاح', report_id, reason}\nResponse 404: البلاغ غير موجود"
+                    }
+                },
+                {
+                    "name": "Delete Report",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/reports/1",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "reports",
+                                "1"
+                            ]
+                        },
+                        "description": "حذف بلاغ (غيّر 1 بـ report_id)\n\nيجب أن يكون البلاغ خاصاً بك\n\nResponse 200: {success: true, message: 'تم حذف البلاغ بنجاح'}\nResponse 404: البلاغ غير موجود"
                     }
                 }
             ]

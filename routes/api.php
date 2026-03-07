@@ -212,7 +212,10 @@ Route::middleware('auth:api')->group(function () {
     });
 
     // ========== Report Post ==========
-    Route::post('/posts/{id}/report', [PostController::class, 'report']); // بلاغ على بوست
+    Route::post('/posts/{id}/report', [PostController::class, 'report']);        // بلاغ على بوست
+    Route::get('/my-reports', [PostController::class, 'myReports']);             // قائمة بلاغاتي
+    Route::put('/reports/{reportId}', [PostController::class, 'updateReport']);  // تعديل بلاغ
+    Route::delete('/reports/{reportId}', [PostController::class, 'deleteReport']); // حذف بلاغ
 });
 
 
