@@ -1,120 +1,10 @@
 {
     "info": {
-        "_postman_id": "85b37e27-322b-43c1-b258-3dab0ce6cbcd",
-        "name": "Sawalef Payments (MyFatoorah & Manual)",
-        "description": "Collection for testing MyFatoorah integration and Manual Bank Transfer endpoints.",
+        "_postman_id": "c3d4e5f6-a7b8-4c5d-9e0f-1a2b3c4d5e6f",
+        "name": "Sawalef Wallet & Apple IAP",
+        "description": "All wallet endpoints including Moyasar payment, manual transfer, and Apple In-App Purchase verification.",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
-    "item": [
-        {
-            "name": "1. Get Available Payment Methods",
-            "request": {
-                "method": "GET",
-                "header": [
-                    {
-                        "key": "Accept",
-                        "value": "application/json"
-                    }
-                ],
-                "url": {
-                    "raw": "{{base_url}}/api/wallet/payment-methods?amount=100",
-                    "host": [
-                        "{{base_url}}"
-                    ],
-                    "path": [
-                        "api",
-                        "wallet",
-                        "payment-methods"
-                    ],
-                    "query": [
-                        {
-                            "key": "amount",
-                            "value": "100",
-                            "description": "Optional amount to check available methods for."
-                        }
-                    ]
-                },
-                "description": "Fetches real payment methods from MyFatoorah API + the Manual Bank Transfer option (ID: 999)."
-            },
-            "response": []
-        },
-        {
-            "name": "2. Initiate Deposit (MyFatoorah)",
-            "request": {
-                "method": "POST",
-                "header": [
-                    {
-                        "key": "Accept",
-                        "value": "application/json"
-                    },
-                    {
-                        "key": "Content-Type",
-                        "value": "application/json"
-                    }
-                ],
-                "body": {
-                    "mode": "raw",
-                    "raw": "{\n    \"amount\": 100,\n    \"payment_method_id\": 2\n}",
-                    "options": {
-                        "raw": {
-                            "language": "json"
-                        }
-                    }
-                },
-                "url": {
-                    "raw": "{{base_url}}/api/wallet/deposit",
-                    "host": [
-                        "{{base_url}}"
-                    ],
-                    "path": [
-                        "api",
-                        "wallet",
-                        "deposit"
-                    ]
-                },
-                "description": "Initiate a charge using a MyFatoorah gateway ID (like 2 for Vodafone Cash). Returns a payment_url."
-            },
-            "response": []
-        },
-        {
-            "name": "3. Initiate Deposit (Manual Bank Transfer)",
-            "request": {
-                "method": "POST",
-                "header": [
-                    {
-                        "key": "Accept",
-                        "value": "application/json"
-                    },
-                    {
-                        "key": "Content-Type",
-                        "value": "application/json"
-                    }
-                ],
-                "body": {
-                    "mode": "raw",
-                    "raw": "{\n    \"amount\": 500,\n    \"payment_method_id\": 999,\n    \"bank_name\": \"Bank Misr / Wallet Number\",\n    \"transaction_id\": \"TXN-100200300\"\n}",
-                    "options": {
-                        "raw": {
-                            "language": "json"
-                        }
-                    }
-                },
-                "url": {
-                    "raw": "{{base_url}}/api/wallet/deposit",
-                    "host": [
-                        "{{base_url}}"
-                    ],
-                    "path": [
-                        "api",
-                        "wallet",
-                        "deposit"
-                    ]
-                },
-                "description": "Initiate a manual bank transfer request. Uses static ID 999."
-            },
-            "response": []
-        }
-    ],
     "auth": {
         "type": "bearer",
         "bearer": [
@@ -125,24 +15,277 @@
             }
         ]
     },
-    "event": [
+    "item": [
         {
-            "listen": "prerequest",
-            "script": {
-                "type": "text/javascript",
-                "exec": [
-                    ""
-                ]
-            }
+            "name": "Wallet",
+            "item": [
+                {
+                    "name": "1. Get Wallet Balance",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/wallet/balance",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "wallet",
+                                "balance"
+                            ]
+                        },
+                        "description": "Response: { wallet_balance: float, gems: int }"
+                    }
+                },
+                {
+                    "name": "2. Get Transaction History",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/wallet/transactions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "wallet",
+                                "transactions"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "3. Get Payment Methods",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/wallet/payment-methods?amount=100",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "wallet",
+                                "payment-methods"
+                            ],
+                            "query": [
+                                {
+                                    "key": "amount",
+                                    "value": "100"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "4. Initiate Deposit (Moyasar)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"amount\": 100,\n    \"payment_method_id\": 2\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/wallet/deposit",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "wallet",
+                                "deposit"
+                            ]
+                        },
+                        "description": "Returns a payment_url. payment_method_id: 1=Mada, 2=Credit Card, 3=Apple Pay (Moyasar)"
+                    }
+                },
+                {
+                    "name": "5. Initiate Deposit (Manual Bank Transfer)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"amount\": 500,\n    \"payment_method_id\": 999,\n    \"bank_name\": \"Al Rajhi Bank\",\n    \"transaction_id\": \"TXN-100200300\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/wallet/deposit",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "wallet",
+                                "deposit"
+                            ]
+                        },
+                        "description": "Manual bank transfer. Status will be 'pending' until admin approves."
+                    }
+                },
+                {
+                    "name": "6. Withdrawal",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"amount\": 100,\n    \"bank_account\": \"SA0000000000000000000000\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/wallet/withdrawal",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "wallet",
+                                "withdrawal"
+                            ]
+                        },
+                        "description": "Minimum withdrawal: 50 SAR. Status will be 'pending' until admin processes it."
+                    }
+                },
+                {
+                    "name": "7. Purchase Package",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"package_id\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/wallet/purchase-package",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "wallet",
+                                "purchase-package"
+                            ]
+                        },
+                        "description": "Deducts price from wallet balance and adds gems to user account."
+                    }
+                }
+            ]
         },
         {
-            "listen": "test",
-            "script": {
-                "type": "text/javascript",
-                "exec": [
-                    ""
-                ]
-            }
+            "name": "Apple IAP (iOS Only)",
+            "item": [
+                {
+                    "name": "Verify Apple IAP Purchase",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"product_id\": \"swalaf_deposit_50\",\n    \"receipt_data\": \"<base64_encoded_receipt_from_flutter_iap>\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/wallet/verify-apple-iap",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "wallet",
+                                "verify-apple-iap"
+                            ]
+                        },
+                        "description": "Verify Apple In-App Purchase receipt and credit wallet.\n\nProduct IDs & Amounts:\n  swalaf_deposit_10  → 10 SAR\n  swalaf_deposit_25  → 25 SAR\n  swalaf_deposit_50  → 50 SAR\n  swalaf_deposit_100 → 100 SAR\n\nResponse 200:\n{\n  status: true,\n  message: 'تم شحن المحفظة بنجاح 🎉',\n  data: { amount_added, new_balance, transaction_id, reference, product_id }\n}\n\nResponse 400: Receipt invalid or product not found\nResponse 409: Transaction already processed (idempotency)"
+                    }
+                }
+            ]
         }
     ],
     "variable": [
@@ -153,7 +296,7 @@
         },
         {
             "key": "token",
-            "value": "INSERT_TOKEN_HERE",
+            "value": "INSERT_JWT_TOKEN_HERE",
             "type": "string"
         }
     ]

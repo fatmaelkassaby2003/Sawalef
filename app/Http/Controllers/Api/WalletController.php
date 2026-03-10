@@ -8,6 +8,7 @@ use App\Models\WalletTransaction;
 use App\Models\Package;
 use App\Models\PackagePurchase;
 use App\Services\MoyasarService;
+use App\Services\AppleIAPService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -426,6 +427,112 @@ class WalletController extends Controller
                 'status' => false,
                 'message' => 'حدث خطأ أثناء شراء الباقة',
                 'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Verify Apple In-App Purchase and credit wallet
+     * POST /wallet/verify-apple-iap
+     * Body: { product_id: string, receipt_data: string }
+     */
+    public function verifyAppleIAP(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'product_id'   => 'required|string',
+            'receipt_data' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'بيانات غير صحيحة',
+                'errors'  => $validator->errors()
+            ], 422);
+        }
+
+        $user        = $request->user();
+        $productId   = $request->product_id;
+        $receiptData = $request->receipt_data;
+
+        // Validate product ID is one we know
+        $knownProducts = array_keys(AppleIAPService::PRODUCT_AMOUNTS);
+        if (!in_array($productId, $knownProducts)) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Product ID غير معروف: ' . $productId,
+            ], 400);
+        }
+
+        try {
+            $iapService = new AppleIAPService();
+            $result     = $iapService->verify($receiptData, $productId);
+
+            if (!$result['success']) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'فشل التحقق من عملية الشراء',
+                    'error'   => $result['error'] ?? 'فشل التحقق من Apple',
+                ], 400);
+            }
+
+            $amount        = $result['amount'];
+            $transactionId = $result['transaction_id'];
+
+            // Idempotency: prevent double-crediting the same Apple transaction
+            $alreadyProcessed = WalletTransaction::where('gateway_invoice_id', $transactionId)
+                ->where('payment_method', 'Apple IAP')
+                ->exists();
+
+            if ($alreadyProcessed) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'تمت معالجة هذه العملية مسبقاً',
+                ], 409);
+            }
+
+            DB::beginTransaction();
+
+            $newBalance = $user->wallet_balance + $amount;
+
+            // Record transaction
+            $transaction = WalletTransaction::create([
+                'user_id'            => $user->id,
+                'type'               => 'deposit',
+                'amount'             => $amount,
+                'balance_before'     => $user->wallet_balance,
+                'balance_after'      => $newBalance,
+                'status'             => 'completed',
+                'payment_method'     => 'Apple IAP',
+                'reference_number'   => WalletTransaction::generateReferenceNumber(),
+                'gateway_invoice_id' => $transactionId,
+                'notes'              => 'Apple IAP - product: ' . $productId,
+            ]);
+
+            // Credit the wallet
+            $user->update(['wallet_balance' => $newBalance]);
+
+            DB::commit();
+
+            return response()->json([
+                'status'  => true,
+                'message' => 'تم شحن المحفظة بنجاح 🎉',
+                'data'    => [
+                    'amount_added'   => (float) $amount,
+                    'new_balance'    => (float) $newBalance,
+                    'transaction_id' => $transaction->id,
+                    'reference'      => $transaction->reference_number,
+                    'product_id'     => $productId,
+                ],
+            ], 200);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Illuminate\Support\Facades\Log::error('Apple IAP Error: ' . $e->getMessage());
+            return response()->json([
+                'status'  => false,
+                'message' => 'حدث خطأ أثناء معالجة عملية الشراء',
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }

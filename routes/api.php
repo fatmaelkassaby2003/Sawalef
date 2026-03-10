@@ -170,12 +170,13 @@ Route::middleware('auth:api')->group(function () {
 
     // Wallet
     Route::prefix('wallet')->group(function () {
-        Route::get('/balance', [WalletController::class, 'getBalance']); // Get wallet balance and gems
-        Route::get('/transactions', [WalletController::class, 'getTransactions']); // Get transaction history
-        Route::get('/payment-methods', [WalletController::class, 'paymentMethods']); // Get available payment methods
-        Route::post('/deposit', [WalletController::class, 'initiateDeposit']); // Charge wallet (initiate payment)
-        Route::post('/withdrawal', [WalletController::class, 'initiateWithdrawal']); // Withdraw from wallet
-        Route::post('/purchase-package', [WalletController::class, 'purchasePackage']); // Purchase package with wallet balance
+        Route::get('/balance', [WalletController::class, 'getBalance']);
+        Route::get('/transactions', [WalletController::class, 'getTransactions']);
+        Route::get('/payment-methods', [WalletController::class, 'paymentMethods']);
+        Route::post('/deposit', [WalletController::class, 'initiateDeposit']);
+        Route::post('/withdrawal', [WalletController::class, 'initiateWithdrawal']);
+        Route::post('/purchase-package', [WalletController::class, 'purchasePackage']);
+        Route::post('/verify-apple-iap', [WalletController::class, 'verifyAppleIAP']); // Apple IAP
     });
 
     // ========== Friendship Routes ==========

@@ -36,8 +36,13 @@ return [
     ],
 
     'agora' => [
-        'app_id' => env('AGORA_APP_ID'),
+        'app_id'          => env('AGORA_APP_ID'),
         'app_certificate' => env('AGORA_APP_CERTIFICATE'),
+    ],
+
+    'apple_iap' => [
+        // App Store Connect → Your App → In-App Purchases → App-Specific Shared Secret
+        'shared_secret' => env('APPLE_IAP_SHARED_SECRET', ''),
     ],
 
 ];
