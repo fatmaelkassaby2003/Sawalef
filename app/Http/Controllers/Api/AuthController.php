@@ -171,6 +171,41 @@ class AuthController extends Controller
     }
 
     /**
+     * Permanent Account Deletion
+     */
+    public function deleteAccount(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        // 1. Delete Profile Image
+        if ($user->profile_image) {
+            $profileImagePath = public_path('uploads/' . $user->profile_image);
+            if (file_exists($profileImagePath)) {
+                @unlink($profileImagePath);
+            }
+        }
+
+        // 2. Delete all images from user's posts
+        $user->posts()->whereNotNull('image')->get()->each(function ($post) {
+            $postImagePath = public_path($post->image);
+            if (file_exists($postImagePath)) {
+                @unlink($postImagePath);
+            }
+        });
+
+        // 3. Delete the user (cascades will handle DB records)
+        $user->delete();
+
+        // 4. Invalidate Token
+        auth('api')->logout();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Your account and all associated data have been permanently deleted.',
+        ]);
+    }
+
+    /**
      * Logout user (invalidate token)
      */
     public function logout(Request $request): JsonResponse

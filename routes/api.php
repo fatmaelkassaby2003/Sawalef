@@ -120,6 +120,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/profile', [AuthController::class, 'profile']);
     Route::post('/update-profile', [AuthController::class, 'updateProfile']);
     Route::post('/logout', [AuthController::class, 'logout']); // Logout
+    Route::delete('/delete-account', [AuthController::class, 'deleteAccount']); // Permanent account deletion
     Route::post('/refresh', function () {
         return response()->json([
             'success' => true,
